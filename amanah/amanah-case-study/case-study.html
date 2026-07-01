@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Amânah — Case Study</title>
+<script>
+  /* Always open the case study at the hero. Don't restore a prior scroll
+     position, and snap to top on load unless the URL deep-links to a section. */
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  addEventListener('load', function () { if (!location.hash) window.scrollTo(0, 0); });
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.24.0/dist/tabler-icons.min.css" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F4F1E9; --surface:#FBFAF6; --surface-2:#F0ECE2;
+    --ink:#16201C; --ink-soft:#3C4842; --muted:#6F776F; --faint:#9AA29A;
+    --line:#E5DFD2; --pine:#0F3D2E; --pine-soft:#1C5A45; --pine-tint:#E8EEE9;
+    --brass:#9C7A3C; --brass-2:#7E6230; --brass-bg:#F0E8D6; --rose:#9A3835;
+    --serif:'Fraunces',Georgia,serif; --sans:'Plus Jakarta Sans',system-ui,sans-serif; --ar:'IBM Plex Sans Arabic',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans); line-height:1.7; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:880px; margin:0 auto; padding:0 24px;}
+  .kicker{font-size:12px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--brass-2);}
+  h1{font-family:var(--serif); font-weight:500; font-size:54px; line-height:1.04; letter-spacing:-1.5px; margin:14px 0 0;}
+  h2{font-family:var(--serif); font-weight:500; font-size:32px; letter-spacing:-.6px; margin:0 0 6px;}
+  h3{font-size:18px; font-weight:600; margin:22px 0 6px;}
+  h4{margin:0;}
+  p{margin:12px 0; color:var(--ink-soft); font-size:17px;}
+  .lead{font-size:20px; color:var(--ink); line-height:1.6;}
+  a{color:var(--pine-soft);}
+  .small{font-size:14px;} .muted{color:var(--muted);}
+  b{font-weight:600;}
+  section{padding:54px 0; border-top:1px solid var(--line);}
+  section:first-of-type{border-top:none;}
+  .secnum{font-family:var(--serif); font-size:15px; color:var(--brass); margin-bottom:10px;}
+  .topbar{position:sticky; top:0; z-index:20; background:rgba(244,241,233,.86); backdrop-filter:blur(10px); border-bottom:1px solid var(--line);}
+  .topbar .row{max-width:880px; margin:0 auto; padding:14px 24px; display:flex; align-items:center; justify-content:space-between;}
+  .brandmark{font-family:var(--serif); font-weight:600; letter-spacing:1px; display:flex; align-items:center; gap:8px;}
+  .topbar nav a{font-size:13px; font-weight:600; text-decoration:none; color:var(--ink-soft); margin-inline-start:18px;}
+  .hero{padding:58px 0 40px;}
+  .meta{display:flex; flex-wrap:wrap; gap:10px; margin-top:26px;}
+  .chip{font-size:12.5px; font-weight:600; background:var(--surface); border:1px solid var(--line); border-radius:30px; padding:7px 14px; color:var(--ink-soft);}
+  .thesis{background:var(--pine); color:#fff; border-radius:24px; padding:38px 34px; margin:8px 0;}
+  .thesis .q{font-family:var(--serif); font-size:26px; line-height:1.4; letter-spacing:-.3px;}
+  .thesis .q b{color:#E7C77E; font-weight:500;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:24px;}
+  .stat{font-family:var(--serif); font-size:34px; font-weight:500; color:var(--pine); letter-spacing:-.5px;}
+  .statgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:18px;}
+  .statgrid .s b{display:block; font-family:var(--serif); font-size:30px; font-weight:500; color:var(--pine); letter-spacing:-.5px;}
+  .statgrid .s span{font-size:13px; color:var(--muted);}
+  ul.clean{list-style:none; padding:0; margin:14px 0 0;}
+  ul.clean li{position:relative; padding-inline-start:26px; margin:11px 0; color:var(--ink-soft); font-size:16px;}
+  ul.clean li::before{content:""; position:absolute; inset-inline-start:0; top:10px; width:8px; height:8px; border-radius:2px; background:var(--brass);}
+  .hmw{counter-reset:h;}
+  .hmw li{counter-increment:h;}
+  .hmw li::before{content:counter(h); width:auto; height:auto; background:none; color:var(--brass-2); font-family:var(--serif); font-weight:600; top:-1px; font-size:15px;}
+  table{width:100%; border-collapse:collapse; margin-top:16px; font-size:14px;}
+  th,td{text-align:center; padding:11px 6px; border-bottom:1px solid var(--line);}
+  th:first-child,td:first-child{text-align:start; font-weight:600;}
+  thead th{font-size:12px; color:var(--muted); font-weight:600;}
+  td.hi{color:var(--pine); font-weight:700;}
+  .sw{display:flex; gap:14px; flex-wrap:wrap; margin-top:16px;}
+  .swatch{text-align:center; font-size:12px; color:var(--muted);}
+  .swatch i{display:block; width:58px; height:58px; border-radius:14px; margin-bottom:7px; border:1px solid rgba(0,0,0,.06);}
+  .devices{display:flex; flex-wrap:wrap; gap:30px 22px; justify-content:center; margin-top:26px;}
+  .device{width:298px;}
+  .device .frame{width:298px; height:602px; overflow:hidden; border-radius:30px;}
+  .device iframe{width:414px; height:836px; border:0; transform:scale(.72); transform-origin:top left;}
+  .device .cap{margin-top:14px;}
+  .device .cap b{font-size:15px;} .device .cap span{display:block; font-size:13px; color:var(--muted); margin-top:2px; line-height:1.5;}
+  .pair{display:flex; gap:22px; flex-wrap:wrap; justify-content:center;}
+  .note{background:var(--brass-bg); border-radius:16px; padding:20px 22px; font-size:15px; color:var(--brass-2); margin-top:16px;}
+  /* insight → decision */
+  .insight{background:var(--surface); border:1px solid var(--line); border-inline-start:3px solid var(--brass); border-radius:0 14px 14px 0; padding:18px 22px; margin:18px 0;}
+  .insight .lab{font-size:11.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--brass-2);}
+  .insight p{margin:6px 0 0; font-size:16px; color:var(--ink);}
+  .insight .dec{margin-top:10px; color:var(--pine); font-weight:600; font-size:16px;}
+  /* teardown */
+  .td{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:20px 22px; margin:14px 0;}
+  .td .h{display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap;}
+  .td .h b{font-size:17px;} .td .role{font-size:12px; color:var(--muted);}
+  .td .ln{display:flex; gap:9px; font-size:14.5px; margin-top:9px; align-items:flex-start;}
+  .td .ln i{font-size:17px; flex:none; margin-top:1px;}
+  .pos i{color:var(--pine-soft);} .neg i{color:var(--rose);} .took i{color:var(--brass);}
+  .took{color:var(--ink); font-weight:500;}
+  /* glossary */
+  .defgrid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:18px;}
+  .defcard{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:18px 20px;}
+  .defcard h4{font-family:var(--serif); font-size:20px; font-weight:500; display:flex; align-items:baseline; gap:8px;}
+  .defcard h4 .ar{font-family:var(--ar); color:var(--brass-2); font-size:15px; font-weight:400;}
+  .defcard p{font-size:14.5px; margin:8px 0 0; color:var(--ink-soft); line-height:1.6;}
+  .sources{font-size:13.5px; color:var(--muted); line-height:1.9;}
+  .disc{font-size:13px; color:var(--muted); background:var(--surface-2); border-radius:12px; padding:16px 18px; margin-top:18px; line-height:1.6;}
+  footer{padding:48px 0 70px; text-align:center; color:var(--muted); font-size:14px; border-top:1px solid var(--line);}
+  .viz{margin:24px 0;}
+  .cap{font-size:13px; color:var(--muted); margin-top:10px;}
+  .posmap{width:100%; height:auto; background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:6px;}
+  .voice{margin-top:18px;}
+  .vrow{display:grid; grid-template-columns:128px 1fr; gap:14px; align-items:center; margin:9px 0;}
+  .vrow .vl{font-size:13.5px; font-weight:600; text-align:end; color:var(--ink-soft);}
+  .vbar{display:grid; grid-template-columns:1fr 1fr; height:22px;}
+  .vbar .lh{display:flex; justify-content:flex-end;} .vbar .rh{display:flex; justify-content:flex-start;}
+  .vbar b{display:block; height:100%;}
+  .vbar .lh b{background:var(--rose); border-radius:6px 0 0 6px;}
+  .vbar .rh b{background:var(--pine-soft); border-radius:0 6px 6px 0;}
+  .vlegend{display:flex; gap:22px; justify-content:center; font-size:12.5px; color:var(--muted); margin-top:14px; flex-wrap:wrap;}
+  .vlegend i{width:10px; height:10px; border-radius:2px; display:inline-block; margin-inline-end:7px; vertical-align:middle;}
+  .quotes{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:22px;}
+  .qcard{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:16px 18px;}
+  .qcard .stars{color:var(--brass); font-size:14px; letter-spacing:3px;}
+  .qcard p{font-size:14.5px; margin:9px 0; color:var(--ink); font-family:var(--serif); line-height:1.45;}
+  .qcard .src{font-size:11.5px; color:var(--muted);}
+  .radars{display:flex; flex-wrap:wrap; gap:6px 4px; justify-content:center; margin-top:18px;}
+  .radarcard{width:152px; text-align:center;}
+  .radarcard .rn{font-size:13.5px; font-weight:600; margin-top:-8px;}
+  .radaraxes{display:flex; flex-wrap:wrap; gap:7px 16px; justify-content:center; font-size:11.5px; color:var(--muted); margin-top:8px;}
+  .hawlwrap{display:flex; justify-content:center; margin:10px 0 4px;}
+  .insight{background:none; border:none; border-inline-start:2px solid var(--brass); border-radius:0; padding:2px 0 2px 20px; margin:20px 0;}
+  .note{background:none; border:none; border-inline-start:2px solid var(--brass-soft); border-radius:0; padding:4px 0 4px 18px; margin-top:16px;}
+  .disc{background:none; border:none; border-top:1px solid var(--line); border-radius:0; padding:16px 0 0; margin-top:20px;}
+  .lex{margin-top:22px; border-top:1px solid var(--line);}
+  .term{display:grid; grid-template-columns:210px 1fr; gap:24px; padding:18px 0; border-bottom:1px solid var(--line); align-items:baseline;}
+  .term .t{font-family:var(--serif); font-size:22px; font-weight:500; line-height:1.2;}
+  .term .t .ar{font-family:var(--ar); color:var(--brass-2); font-size:15px; font-weight:400; display:block; margin-top:3px;}
+  .term p{margin:0; font-size:15.5px; color:var(--ink-soft); line-height:1.6;}
+  .figs{display:flex; flex-wrap:wrap; margin-top:28px;}
+  .figs .f{flex:1; min-width:150px; padding:4px 26px; border-inline-start:1px solid var(--line);}
+  .figs .f:first-child{padding-inline-start:0; border-inline-start:none;}
+  .figs .f b{font-family:var(--serif); font-size:50px; font-weight:500; color:var(--pine); line-height:1; letter-spacing:-1px; display:block;}
+  .figs .f span{font-size:13.5px; color:var(--muted); display:block; margin-top:12px; line-height:1.5;}
+  .tdx{margin-top:12px; border-top:1px solid var(--line);}
+  .tdrow{padding:20px 0; border-bottom:1px solid var(--line);}
+  .tdrow .nm{font-family:var(--serif); font-size:21px; font-weight:500;}
+  .tdrow .role{font-size:12.5px; color:var(--muted); margin-inline-start:10px;}
+  .tdrow .pts{margin-top:9px; font-size:14.5px; color:var(--ink-soft); line-height:1.6;}
+  .tdrow .pts .mk{font-weight:700; margin-inline-end:6px;}
+  .tdrow .pts .pos{color:var(--pine-soft);} .tdrow .pts .neg{color:var(--rose);}
+  .tdrow .imp{margin-top:9px; font-size:14px; color:var(--ink);}
+  .tdrow .imp em{color:var(--brass-2); font-style:normal; font-weight:600;}
+  .pq{display:grid; grid-template-columns:repeat(3,1fr); gap:30px; margin-top:26px;}
+  .pqi .stars{color:var(--brass); font-size:13px; letter-spacing:3px;}
+  .pqi blockquote{margin:10px 0 0; font-family:var(--serif); font-size:18px; line-height:1.42; color:var(--ink);}
+  .pqi .src{font-size:11.5px; color:var(--muted); margin-top:10px;}
+  .profile{margin-top:10px; border-top:1px solid var(--line); padding-top:22px;}
+  .rails{display:flex; margin-top:24px; border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+  .rail{flex:1; padding:24px 20px; text-align:center; border-inline-start:1px solid var(--line);}
+  .rail:first-child{border-inline-start:none;}
+  .ric{width:48px; height:48px; border-radius:50%; background:var(--pine-tint); color:var(--pine); display:inline-flex; align-items:center; justify-content:center; font-size:23px;}
+  .rail b{display:block; font-family:var(--serif); font-size:19px; font-weight:500; margin-top:13px;}
+  .rail .rr{display:block; font-size:13px; color:var(--muted); margin-top:7px; line-height:1.5;}
+  .flowsteps{display:flex; justify-content:space-between; gap:4px; margin-top:24px; position:relative;}
+  .flowsteps::before{content:""; position:absolute; top:16px; inset-inline-start:8%; inset-inline-end:8%; height:2px; background:var(--line);}
+  .fs{flex:1; text-align:center; font-size:13px; font-weight:600; color:var(--ink-soft); position:relative; z-index:1;}
+  .fs .n{display:flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:50%; background:var(--pine); color:#fff; font-family:var(--serif); margin:0 auto 9px;}
+  .specimen{display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:24px; border-top:1px solid var(--line); padding-top:22px;}
+  .sp .lbl2{font-size:12px; color:var(--muted); letter-spacing:.03em;}
+  .sp .glyph{font-family:var(--serif); font-size:60px; line-height:1; color:var(--pine); letter-spacing:-1px; margin:8px 0 10px;}
+  .sp .ex{font-size:22px; color:var(--ink-soft); font-family:var(--serif);}
+  .sp.ar .glyph, .sp.ar .ex{font-family:var(--ar); letter-spacing:0;}
+  .findings{margin-top:20px; border-top:1px solid var(--line);}
+  .finding{display:grid; grid-template-columns:58px 1fr; gap:18px; padding:22px 0; border-bottom:1px solid var(--line);}
+  .finding .fnum{font-family:var(--serif); font-size:30px; color:var(--brass); line-height:1; font-weight:500;}
+  .finding h4{font-family:var(--serif); font-size:20px; font-weight:500; margin:0 0 6px; line-height:1.25;}
+  .finding p{margin:0; font-size:15.5px; color:var(--ink-soft); line-height:1.6;}
+  .finding .ftag{margin-top:10px; font-size:11px; color:var(--faint); letter-spacing:.08em; text-transform:uppercase;}
+  .rejected{margin-top:18px; border-top:1px solid var(--line);}
+  .rej{display:grid; grid-template-columns:210px 1fr; gap:22px; padding:18px 0; border-bottom:1px solid var(--line); align-items:baseline;}
+  .rej .rt2{font-family:var(--serif); font-size:18px; color:var(--muted); line-height:1.25;}
+  .rej .rt2 .x{color:var(--rose); font-weight:600; margin-inline-end:7px;}
+  .rej p{margin:0; font-size:15px; color:var(--ink-soft); line-height:1.6;}
+  @media (max-width:640px){ h1{font-size:38px;} .grid2,.defgrid,.statgrid,.quotes,.pq,.term,.specimen{grid-template-columns:1fr;} .term{gap:4px;} .finding,.rej{grid-template-columns:1fr; gap:4px;} .vrow{grid-template-columns:90px 1fr;} .rails{flex-direction:column;} .rail{border-inline-start:none; border-top:1px solid var(--line);} .rail:first-child{border-top:none;} .fs{font-size:11px;} .device,.device .frame{width:260px;} .device .frame{height:525px;} .device iframe{transform:scale(.628);} }
+  body{overflow-x:hidden;}
+  #prog{position:fixed; top:0; inset-inline-start:0; height:3px; width:0; background:var(--pine); z-index:60;}
+  .anim .reveal{opacity:0; transform:translateY(18px);}
+  .anim .reveal.in{opacity:1; transform:none; transition:opacity .7s cubic-bezier(.2,.6,.3,1), transform .7s cubic-bezier(.2,.6,.3,1);}
+  .split{display:grid; grid-template-columns:1.05fr .95fr; gap:46px; align-items:center; margin-top:8px;}
+  .thesis{width:100vw; margin-inline:calc(50% - 50vw); margin-block:48px; border-radius:0; padding:66px 24px;}
+  .thesis .q{max-width:760px; margin:0 auto; font-size:30px;}
+  @media (prefers-reduced-motion: reduce){ .anim .reveal{opacity:1 !important; transform:none !important;} }
+  @media (max-width:640px){ .split{grid-template-columns:1fr; gap:24px;} .thesis{padding:46px 22px;} .thesis .q{font-size:23px;} }
+  .vidslot{aspect-ratio:16/9; width:100%; background:radial-gradient(120% 140% at 80% 0%, #1C5A45, #0F3D2E 55%, #0A2E22); border-radius:22px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#fff; gap:12px; margin:12px 0 6px;}
+  .vidslot .play{width:66px; height:66px; border-radius:50%; background:rgba(255,255,255,.14); display:flex; align-items:center; justify-content:center; font-size:30px;}
+  .vidslot b{font-family:var(--serif); font-weight:500; font-size:21px;}
+  .vidslot span{font-size:13px; color:rgba(255,255,255,.65);}
+  .vidcap{font-size:13px; color:var(--muted); margin-top:8px;}
+  @media print { .vidslot{display:none;} }
+  @media print {
+    @page { margin: 14mm; }
+    body { background:#fff; }
+    .topbar { display:none !important; }
+    #prog { display:none !important; }
+    .anim .reveal { opacity:1 !important; transform:none !important; }
+    .thesis { width:auto !important; margin:18px 0 !important; padding:34px 30px !important; }
+    .split { grid-template-columns:1fr !important; gap:14px !important; }
+    section { padding:22px 0; }
+    a { color: var(--pine); text-decoration:none; }
+    .device, .radarcard, .rail, .term, .tdrow, .pqi, .thesis, .insight, .sp, .fs, .card, .statcard, .figs .f { break-inside: avoid; }
+    h1, h2, h3 { break-after: avoid; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
+</style>
+</head>
+<body>
+<div id="prog"></div>
+
+<div class="topbar"><div class="row">
+  <div class="brandmark"><i class="ti ti-diamond" style="font-size:15px;"></i> AMÂNAH</div>
+  <nav><a href="../../index.html#work" style="color:var(--brass-2);font-weight:700;">← Portfolio</a><a href="#primer">Primer</a><a href="#desk">Research</a><a href="#compete">Competitors</a><a href="#flow">The flow</a></nav>
+</div></div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="kicker">Self-initiated case study · 2026</div>
+    <h1>An Islamic-first neobank,<br>designed Arabic-first.</h1>
+    <p class="lead" style="margin-top:20px; max-width:660px;">A concept for everyday banking that lets Emirati users keep both their values and a world-class experience — Sharia-compliant by design, and genuinely native in Arabic.</p>
+    <div class="meta">
+      <span class="chip">Senior Product Designer</span>
+      <span class="chip">Research → strategy → UI → prototype</span>
+      <span class="chip">Android · Material 3</span>
+      <span class="chip">Arabic RTL-native</span>
+    </div>
+    <p class="vidcap" style="margin-top:18px; max-width:660px;">A self-initiated concept — built to demonstrate research, strategy and Arabic-RTL craft for an unfamiliar, high-context market. Validation with users is the defined next phase (see §13), not an afterthought.</p>
+  </header>
+
+  <div class="vidslot" id="walkthrough">
+    <span class="play"><i class="ti ti-player-play"></i></span>
+    <b>3-minute walkthrough</b>
+    <span>Narrated video — recording soon</span>
+  </div>
+  <p class="vidcap">A short voice-over of the thinking and the key flows.</p>
+  <!-- WHEN YOU HAVE THE VIDEO: replace the <div class="vidslot">…</div> above with your embed —
+       <div style="position:relative;padding-top:56.25%;border-radius:22px;overflow:hidden;margin:12px 0;">
+         <iframe src="https://www.loom.com/embed/XXXXXXXX" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0;"></iframe>
+       </div>  -->
+
+  <section>
+    <div class="secnum">01</div>
+    <h2>Context</h2>
+    <p>The UAE is one of the world's most active fintech markets, in a distinctive banking culture. Conventional neobanks — Liv., Wio, YAP — have set a high bar for digital experience, while Islamic incumbents such as ADIB and Dubai Islamic Bank hold deep trust and Sharia-compliance but often run on older, friction-heavy apps. In practice, observant users tend to face a quiet trade-off between their values and a polished experience.</p>
+    <p>I took this on as a self-initiated project, to explore what closing that gap might look like for a user the market rarely designs for natively: the <b>Emirati national</b>, for whom Arabic is the language of anything serious, and for whom Sharia-compliance is a matter of identity rather than a feature.</p>
+    <div class="figs">
+      <div class="f"><b>~89%</b><span>of UAE residents are expats — leaving Emirati citizens a smaller, underserved premium segment</span></div>
+      <div class="f"><b>12.5M+</b><span>users on Aani, the UAE's instant-payment rail, by 2026</span></div>
+      <div class="f"><b>2.5%</b><span>the Zakat rate — an annual obligation most banking apps aren't designed around</span></div>
+    </div>
+  </section>
+
+  <section id="primer">
+    <div class="secnum">02</div>
+    <h2>First, the world this app lives in</h2>
+    <p>To judge the design you need the vocabulary it's built on. Islamic finance isn't "banking with a green logo" — it's a different model with real product consequences. Here's the plain-language version.</p>
+    <div class="lex">
+      <div class="term"><div class="t">Zakat <span class="ar">زكاة</span></div><p>One of the five pillars of Islam: an <b>obligatory annual charity of 2.5%</b> on the wealth a Muslim has held for a full lunar year, once it passes a minimum threshold. It purifies wealth and redistributes it to those in need.</p></div>
+      <div class="term"><div class="t">Nisab <span class="ar">نِصاب</span></div><p>The <b>threshold</b> Zakat begins at — the value of about <b>85g of gold</b> or <b>595g of silver</b>. Below it, no Zakat is due. Because it's pegged to metal prices, the figure moves daily.</p></div>
+      <div class="term"><div class="t">Hawl <span class="ar">حول</span></div><p>The <b>one lunar year</b> wealth must stay above Nisab before Zakat is owed. The Hijri year is ~354 days — shorter than the Gregorian — so reminders are best timed to the moon, not the calendar.</p></div>
+      <div class="term"><div class="t">Riba <span class="ar">ربا</span></div><p>The <b>prohibition of interest</b>. A fixed, guaranteed return on lent money is not permitted — which is why the app speaks of shared profit, never "interest".</p></div>
+      <div class="term"><div class="t">Mudarabah <span class="ar">مضاربة</span></div><p>The permitted alternative to interest: <b>profit-sharing</b>. The bank invests a deposit and shares the real profit by an agreed ratio. No fixed rate, no guarantee — the return follows actual performance.</p></div>
+      <div class="term"><div class="t">The 8 asnaf <span class="ar">المصارف الثمانية</span></div><p>The <b>eight categories of people</b> named in the Qur'an who may receive Zakat — the poor, the needy, those in debt, the wayfarer, and others. Where Zakat may go is itself a religious matter.</p></div>
+      <div class="term"><div class="t">Sukuk <span class="ar">صكوك</span></div><p>"Islamic bonds" — but rather than paying interest, they represent <b>ownership of real assets</b> and pay returns from those assets. A permitted way to invest and earn.</p></div>
+      <div class="term"><div class="t">Sadaqah &amp; Waqf <span class="ar">صدقة · وقف</span></div><p><b>Sadaqah</b> is voluntary charity — any amount, any time. <b>Waqf</b> is an endowment, an asset held so its proceeds give in perpetuity. Both sit alongside Zakat as distinct acts of giving.</p></div>
+    </div>
+    <div class="insight">
+      <div class="lab">Why this matters for design</div>
+      <p>Each of these concepts becomes an interface decision: live-priced Nisab, a lunar reminder engine, the word "profit" in place of "interest", a multi-asset calculator, and giving routed to verified recipients within the eight asnaf.</p>
+      <div class="dec">The product needed to reflect fiqh (Islamic jurisprudence), not simply visualise balances.</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="secnum">03</div>
+    <h2>The challenge</h2>
+    <p class="lead">Can an Islamic bank feel as effortless as Wio <i>and</i> as genuinely Sharia-compliant as the incumbents — in Arabic, first?</p>
+  </section>
+
+  <section id="desk">
+    <div class="secnum">04</div>
+    <h2>Desk research — the rails and the rules</h2>
+    <p>Before any pixels, I mapped the national systems a UAE banking app plugs into. Three rails shaped onboarding, payments and the Zakat engine.</p>
+    <div class="rails">
+      <div class="rail"><span class="ric"><i class="ti ti-shield-check"></i></span><b>UAE PASS</b><span class="rr">National identity, 11M+ users. Instant, verified onboarding — no selfie.</span></div>
+      <div class="rail"><span class="ric"><i class="ti ti-bolt"></i></span><b>Aani</b><span class="rr">Central-bank instant payments, 12.5M+ users. Pay by mobile number in ~3s.</span></div>
+      <div class="rail"><span class="ric"><i class="ti ti-coins"></i></span><b>AAOIFI gold</b><span class="rr">Shariah-compliant gold, mandatory since 2018. Counts toward Zakat.</span></div>
+    </div>
+    <p class="small muted" style="margin-top:12px;">Sources: CBUAE &amp; Al Etihad Payments · TDRA / ICP · World Gold Council / AAOIFI · Emirates Islamic.</p>
+    <div class="insight">
+      <div class="lab">Insight</div>
+      <p>Onboarding by Emirates-ID scan and selfie is table-stakes. UAE PASS — which most Emiratis already have — tends to be used by competitors for login, not account opening.</p>
+      <div class="dec">So onboarding leads with UAE PASS: near-instant, no selfie, and built for citizens.</div>
+    </div>
+    <div class="disc"><b>On rigour &amp; honesty:</b> figures above are drawn from public sources (Central Bank of the UAE, Al Etihad Payments, TDRA/ICP, World Gold Council, and app-store listings). This is a concept project: I had no quantitative access, so I triangulated secondary research, competitive teardowns, app-store review mining and four informal expert conversations — and I label directional insight as directional, never as statistics.</div>
+  </section>
+
+  <section id="compete">
+    <div class="secnum">05</div>
+    <h2>Competitive analysis</h2>
+    <p>I worked through five apps across onboarding, IA, core flows, Islamic features and — carefully — Arabic/RTL quality, scoring each 1–5. Two patterns shaped the direction.</p>
+    <div class="tdx">
+      <div class="tdrow">
+        <div><span class="nm">ADIB</span><span class="role">Islamic incumbent — the feature leader</span></div>
+        <div class="pts"><span class="mk pos">+</span>First UAE bank to onboard via Ministry-of-Interior facial recognition (2021); in-app Zakat payment, Red Crescent Sukuk donations, fractional Sukuk from $1,000, and a PFM tool built with Lune.</div>
+        <div class="pts"><span class="mk pos">+</span>Enormous incumbent footprint — 1.3M+ app users, 200+ services; first UAE Open Finance TPP; piloting Spatial Banking on Vision Pro.</div>
+        <div class="pts"><span class="mk neg">–</span>Reviews repeatedly cite post-update crashes and slowness — deep features, fragile delivery.</div>
+        <div class="imp"><em>Implication</em> — Islamic depth is the real differentiator, but only when it ships on a reliable, modern foundation.</div>
+      </div>
+      <div class="tdrow">
+        <div><span class="nm">Dubai Islamic Bank</span><span class="role">Largest Islamic bank</span></div>
+        <div class="pts"><span class="mk pos">+</span>"Banking in minutes" onboarding; UAE PASS integrated; Aani payments; Zakat &amp; charity payment.</div>
+        <div class="pts"><span class="mk neg">–</span>UAE PASS used for login only; no confirmed in-app Zakat calculator; reviews flag dated UI and biometric failures.</div>
+        <div class="imp"><em>Implication</em> — a genuine in-app Zakat calculator is still an open gap among the incumbents.</div>
+      </div>
+      <div class="tdrow">
+        <div><span class="nm">Emirates Islamic</span><span class="role">Islamic feature benchmark</span></div>
+        <div class="pts"><span class="mk pos">+</span>Ships a full Zakat calculator and Shariah-compliant digital gold/silver — proof the depth is buildable.</div>
+        <div class="imp"><em>Implication</em> — a Smart-Zakat-and-gold scope is realistic; the challenge is experience, not feasibility.</div>
+      </div>
+      <div class="tdrow">
+        <div><span class="nm">Wio</span><span class="role">The UX bar</span></div>
+        <div class="pts"><span class="mk pos">+</span>Euromoney's Best Digital Bank in the Middle East 2025; "Today / Tomorrow / Future" Paths IA, auto-categorised insights, Saving Spaces.</div>
+        <div class="pts"><span class="mk pos">+</span>Heavily backed (ADQ, e&amp;, FAB); API-first via Pine Labs on a Mambu core; holds DFSA in-principle banking approval.</div>
+        <div class="pts"><span class="mk neg">–</span>Loses trust at the exception layer — refunds, disputes, blocked transfers; not Islamic-first.</div>
+        <div class="imp"><em>Implication</em> — match Wio's polish, and differentiate through transparency and recoverable money handling.</div>
+      </div>
+      <div class="tdrow">
+        <div><span class="nm">Liv. &amp; YAP</span><span class="role">Lifestyle neobank · independent fintech</span></div>
+        <div class="pts"><span class="mk pos">+</span>Liv. shows premium editorial polish in-region; YAP (now on the Islamic bank Ruya) shows the partner-bank model.</div>
+        <div class="pts"><span class="mk neg">–</span>Liv.'s super-app reach and a big-bang re-platform unsettled existing users; YAP draws fee and transparency complaints.</div>
+        <div class="imp"><em>Implication</em> — lead with clarity rather than a super-app of features.</div>
+      </div>
+    </div>
+
+    <h3>Reading each app's shape</h3>
+    <p>Small-multiple radars across five dimensions — you can read where each app is strong, and where it isn't, at a glance.</p>
+    <div class="radars" id="radars"></div>
+    <div class="radaraxes" id="radaxes"></div>
+    <p class="small muted" style="margin-top:14px; text-align:center;">Each Islamic app tends to be thin on craft; each neobank, thin on Islamic depth. No single product covers both.</p>
+
+    <h3 style="margin-top:36px;">What the reviews suggest</h3>
+    <p>App-store reviews, coded into themes. It's directional rather than quantitative, but consistent: people tend to leave over reliability and service rather than features.</p>
+    <div class="voice">
+      <div class="vrow"><div class="vl">Reliability</div><div class="vbar"><div class="lh"><b style="width:82%"></b></div><div class="rh"><b style="width:18%"></b></div></div></div>
+      <div class="vrow"><div class="vl">Customer support</div><div class="vbar"><div class="lh"><b style="width:76%"></b></div><div class="rh"><b style="width:24%"></b></div></div></div>
+      <div class="vrow"><div class="vl">Arabic / RTL</div><div class="vbar"><div class="lh"><b style="width:64%"></b></div><div class="rh"><b style="width:36%"></b></div></div></div>
+      <div class="vrow"><div class="vl">Islamic depth</div><div class="vbar"><div class="lh"><b style="width:58%"></b></div><div class="rh"><b style="width:42%"></b></div></div></div>
+      <div class="vrow"><div class="vl">Onboarding speed</div><div class="vbar"><div class="lh"><b style="width:22%"></b></div><div class="rh"><b style="width:78%"></b></div></div></div>
+      <div class="vrow"><div class="vl">Visual polish</div><div class="vbar"><div class="lh"><b style="width:28%"></b></div><div class="rh"><b style="width:72%"></b></div></div></div>
+      <div class="vlegend"><span><i style="background:var(--rose)"></i>Complaints</span><span><i style="background:var(--pine-soft)"></i>Praise</span></div>
+    </div>
+    <div class="pq">
+      <div class="pqi"><div class="stars">★☆☆☆☆</div><blockquote>"It became literally unusable after the update."</blockquote><div class="src">Reliability · Islamic incumbent</div></div>
+      <div class="pqi"><div class="stars">★★★★★</div><blockquote>"The smoothest virtual banking I've seen so far."</blockquote><div class="src">Delight · leading neobank</div></div>
+      <div class="pqi"><div class="stars">★★☆☆☆</div><blockquote>"Feels outdated compared to modern standards."</blockquote><div class="src">Dated UI · Islamic incumbent</div></div>
+    </div>
+    <p class="small muted" style="text-align:center; margin-top:12px;">Representative themes &amp; quotes coded from public 1★ / 5★ app-store reviews.</p>
+  </section>
+
+  <section>
+    <div class="secnum">06</div>
+    <h2>Reading the results</h2>
+    <p>Across the primer, the desk research, the teardown and the reviews, the same five conclusions kept surfacing — each triangulated from more than one source.</p>
+    <div class="findings">
+      <div class="finding"><div class="fnum">01</div><div><h4>Trust is lost after acquisition, not during it</h4><p>Onboarding is praised almost everywhere; the complaints cluster on reliability, support, refunds and frozen accounts. The weak point isn't getting users in — it's holding their confidence once money is moving.</p><div class="ftag">Read from: review mining · competitive teardown</div></div></div>
+      <div class="finding"><div class="fnum">02</div><div><h4>Sharia-compliance is marketed, not engineered</h4><p>Only ADIB and Emirates Islamic ship real Islamic tooling; DIB has no in-app Zakat calculator, and the neobanks none at all. "Compliant" is mostly a label — which leaves genuine product depth wide open.</p><div class="ftag">Read from: competitive teardown</div></div></div>
+      <div class="finding"><div class="fnum">03</div><div><h4>Craft and compliance never appear together</h4><p>The radar shapes make it plain: Islamic apps are thin on craft, neobanks thin on Islamic depth. No product holds both, so the intersection is unclaimed rather than crowded.</p><div class="ftag">Read from: scoring radars</div></div></div>
+      <div class="finding"><div class="fnum">04</div><div><h4>Arabic is shipped everywhere, designed nowhere</h4><p>Every app offers Arabic, yet none demonstrably treats RTL as first-class design — it's the one dimension I couldn't even score. That makes it a quiet craft advantage, not a feature war.</p><div class="ftag">Read from: RTL audit</div></div></div>
+      <div class="finding"><div class="fnum">05</div><div><h4>Zakat is the biggest emotional moment and the smallest toolset</h4><p>Zakat is annual, manual, lunar-timed and anxiety-laden — yet barely supported in-app. The highest-meaning moment in a Muslim user's financial year is exactly where the tooling is weakest.</p><div class="ftag">Read from: Islamic-finance primer · user behaviour</div></div></div>
+    </div>
+    <p style="margin-top:22px;">Put together, they point one way:</p>
+    <div class="thesis"><div class="q">Onboarding is already table-stakes. The opportunity lies in treating <b>Islamic finance as genuine product depth</b>, in <b>first-class Arabic RTL</b>, and in <b>transparent money handling</b> — and, for an Emirati user, in <b>UAE PASS onboarding</b> that competitors haven't yet adopted.</div></div>
+  </section>
+
+  <section id="persona">
+    <div class="secnum">07</div>
+    <h2>Who I designed for</h2>
+    <p>Synthesised from the review mining and four expert conversations — presented honestly as a <b>proto-persona</b>, not recruited research.</p>
+    <div class="profile">
+      <div style="display:flex; align-items:center; gap:16px;">
+        <div style="width:58px; height:58px; border-radius:50%; background:var(--pine); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-weight:600; font-size:18px;">HM</div>
+        <div><h3 style="margin:0;">Hessa Al Marri · 34</h3><div class="muted small">Emirati · Abu Dhabi · senior government professional · married, two children</div></div>
+      </div>
+      <p style="color:var(--pine-soft); font-weight:600; font-size:18px; font-family:var(--serif); margin:18px 0 0;">"I want a bank that respects my faith and my time. Right now I get one or the other."</p>
+      <div class="grid2" style="margin-top:18px;">
+        <div>
+          <div class="kicker">Goals</div>
+          <ul class="clean">
+            <li>Bank as smoothly as a Wio user, without compromising her values</li>
+            <li>Pay Zakat correctly and on time, across all her assets</li>
+            <li>Give meaningfully — and see it actually reach people</li>
+          </ul>
+        </div>
+        <div>
+          <div class="kicker">Frustrations</div>
+          <ul class="clean">
+            <li>Islamic apps feel dated and buggy; neobanks aren't halal</li>
+            <li>Calculates Zakat by hand once a year, unsure she's counting gold right</li>
+            <li>Arabic in finance apps feels machine-flipped, not designed</li>
+          </ul>
+        </div>
+      </div>
+      <div style="margin-top:18px;"><div class="kicker">Context &amp; behaviour</div>
+      <p class="small" style="margin-top:8px;">Bilingual, but switches to Arabic the moment money gets serious. Already has UAE PASS. Holds part of her wealth in physical gold — inherited and gifted — that sits idle and complicates her Zakat. Her trigger moment is Ramadan, as her Hawl date approaches and the annual Zakat anxiety returns.</p></div>
+    </div>
+    <h3>How might we…</h3>
+    <ul class="clean hmw">
+      <li>make Zakat continuously visible and effortless across all assets, so it stops being an annual panic?</li>
+      <li>make giving feel verified and meaningful, not a transfer into a void?</li>
+      <li>deliver neobank-grade polish while making compliance a visible, trustworthy product?</li>
+      <li>make Arabic-first RTL the premium default, not an afterthought?</li>
+      <li>build trust through transparency, where incumbents lose it?</li>
+    </ul>
+  </section>
+
+  <section id="design">
+    <div class="secnum">08</div>
+    <h2>The design system</h2>
+    <p>Light editorial luxe: a bone canvas, deep pine green, and a single brass accent for Zakat and sacred moments. A high-contrast serif carries the numerals — which stay Western in both languages, so it reads well in Arabic too.</p>
+    <div class="sw">
+      <div class="swatch"><i style="background:#0F3D2E;"></i>Pine</div>
+      <div class="swatch"><i style="background:#9C7A3C;"></i>Brass</div>
+      <div class="swatch"><i style="background:#F4F1E9;"></i>Bone</div>
+      <div class="swatch"><i style="background:#1C5A45;"></i>Pine soft</div>
+      <div class="swatch"><i style="background:#16201C;"></i>Ink</div>
+    </div>
+    <div class="specimen">
+      <div class="sp ser"><div class="lbl2">Fraunces — display &amp; numerals</div><div class="glyph">Aa 0123</div><div class="ex">124,500 AED</div></div>
+      <div class="sp ar"><div class="lbl2">IBM Plex Sans Arabic — Arabic UI</div><div class="glyph">أبجد</div><div class="ex">الرصيد المتاح</div></div>
+    </div>
+    <div class="note"><b>Localization decisions, made explicit:</b> Arabic is the primary design, English mirrors it (full LTR ⇄ RTL). Western numerals (0–9) are the default even in Arabic UI — matching UAE banking convention — with an Arabic-Indic (٠–٩) option. Layout, navigation and chevrons mirror; numbers, charts and the gold time-axis do not.</div>
+    <div class="pair" style="margin-top:30px;">
+      <div class="device"><div class="frame"><iframe loading="lazy" src="../amanah-prototype/index.html?embed=1&screen=s-zakat"></iframe></div><div class="cap"><b>English · LTR</b><span>The Zakat tracker, left-to-right.</span></div></div>
+      <div class="device"><div class="frame"><iframe loading="lazy" src="../amanah-prototype/index.html?embed=1&lang=ar&screen=s-zakat"></iframe></div><div class="cap"><b>العربية · RTL</b><span>The same screen, mirrored — not bolted on.</span></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="secnum">09</div>
+    <h2>Smart Zakat — turning an obligation into a relationship</h2>
+    <div class="split">
+      <div>
+        <p>The research suggested Zakat is an annual, manual and often anxious ritual, made harder by multi-asset wealth and lunar timing. I approached it not as a form to fill in but as something the bank helps with through the year.</p>
+        <div class="insight"><div class="lab">Insight → decision</div><p>Hessa calculates Zakat once a year, and isn't always sure she's counting gold and investments correctly.</p><div class="dec">Track wealth against a live-priced Nisab through the year, with a "Zakat health" status, a Hijri Hawl countdown and a timeline — so the obligation stays visible rather than surfacing as a year-end scramble.</div></div>
+      </div>
+      <div>
+        <div class="hawlwrap" id="hawl"></div>
+        <div class="vlegend" style="margin-top:2px; justify-content:center;"><span><i style="background:#9C7A3C; border-radius:50%"></i>Today · 24 days left</span><span><i style="border:2px solid #9C7A3C; background:transparent; border-radius:50%"></i>Zakat due · 14 Ramadan</span></div>
+        <p class="small muted" style="text-align:center; max-width:420px; margin:12px auto 0;">Nisab was crossed 11 months ago. The Hawl completes — and Zakat falls due — on 14 Ramadan. Amânah tracks the lunar year automatically.</p>
+      </div>
+    </div>
+    <div class="devices">
+      <div class="device"><div class="frame"><iframe loading="lazy" src="../amanah-prototype/index.html?embed=1&screen=s-home"></iframe></div><div class="cap"><b>Home · Zakat tracker</b><span>Hawl countdown, "on track" status and Nisab months at a glance.</span></div></div>
+      <div class="device"><div class="frame"><iframe loading="lazy" src="../amanah-prototype/index.html?embed=1&screen=s-zakat"></iframe></div><div class="cap"><b>The Zakat year</b><span>Hijri timing, Nisab proximity and a tracker timeline.</span></div></div>
+      <div class="device"><div class="frame"><iframe loading="lazy" src="../amanah-prototype/index.html?embed=1&screen=s-profit"></iframe></div><div class="cap"><b>Profit, not interest</b><span>Mudarabah profit-sharing made transparent — the Sharia trust layer.</span></div></div>
+    </div>
+  </section>
+
+  <section id="flow">
+    <div class="secnum">10</div>
+    <h2>The hero flow — calculate &amp; give Zakat</h2>
+    <p>One journey, done deeply — fee-free, with a verifiable receipt.</p>
+    <div class="flowsteps">
+      <div class="fs"><span class="n">1</span>Assets</div>
+      <div class="fs"><span class="n">2</span>Nisab</div>
+      <div class="fs"><span class="n">3</span>Calculate</div>
+      <div class="fs"><span class="n">4</span>Recipients</div>
+      <div class="fs"><span class="n">5</span>Pay</div>
+      <div class="fs"><span class="n">6</span>Receipt</div>
+    </div>
+    <div class="devices">
+      <div class="device"><div class="frame"><iframe loading="lazy" src="../amanah-prototype/index.html?embed=1&screen=s-assets"></iframe></div><div class="cap"><b>Your assets</b><span>Cash, gold and Sukuk assemble into a live zakatable total.</span></div></div>
+      <div class="device"><div class="frame"><iframe loading="lazy" src="../amanah-prototype/index.html?embed=1&screen=s-result"></iframe></div><div class="cap"><b>The calculation</b><span>2.5% across assets, with a clear breakdown and price timestamp.</span></div></div>
+      <div class="device"><div class="frame"><iframe loading="lazy" src="../amanah-prototype/index.html?embed=1&rmode=cat&screen=s-recip"></iframe></div><div class="cap"><b>The eight asnaf</b><span>Direct Zakat across the Quranic recipient categories.</span></div></div>
+      <div class="device"><div class="frame"><iframe loading="lazy" src="../amanah-prototype/index.html?embed=1&screen=s-done"></iframe></div><div class="cap"><b>A dignified close</b><span>In place of celebratory confetti, a calm gold rosette and a short du'a — giving is treated as a sacred act.</span></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="secnum">11</div>
+    <h2>Onboarding — a quieter advantage</h2>
+    <p>For an Emirati user, UAE PASS is the fastest and most trusted way in, and it isn't yet used by competitors for account opening. Verified identity is shared with explicit consent, and because UAE PASS has already verified the user, there's no in-app selfie at all.</p>
+    <div class="devices">
+      <div class="device"><div class="frame"><iframe loading="lazy" src="../amanah-prototype/index.html?embed=1&screen=s-onboard"></iframe></div><div class="cap"><b>Welcome</b><span>Values stated up front.</span></div></div>
+      <div class="device"><div class="frame"><iframe loading="lazy" src="../amanah-prototype/index.html?embed=1&screen=s-consent"></iframe></div><div class="cap"><b>UAE PASS consent</b><span>Explicit, government-grade, no selfie needed.</span></div></div>
+      <div class="device"><div class="frame"><iframe loading="lazy" src="../amanah-prototype/index.html?embed=1&screen=s-impact"></iframe></div><div class="cap"><b>Your impact</b><span>Lifetime giving with verified receipts.</span></div></div>
+      <div class="device"><div class="frame"><iframe loading="lazy" src="../amanah-prototype/index.html?embed=1&theme=dark&screen=s-home"></iframe></div><div class="cap"><b>Dark variant</b><span>The same system, jewel-toned.</span></div></div>
+      <div class="device"><div class="frame"><iframe loading="lazy" src="../amanah-prototype/index.html?embed=1&screen=s-held"></iframe></div><div class="cap"><b>Trust at the edges</b><span>A held transfer, explained — funds safe, with a clear path back and a human to call. The thesis, made real.</span></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="secnum">12</div>
+    <h2>Directions I rejected</h2>
+    <p>Before committing to Zakat &amp; giving as the hero, I scoped other directions and set them aside. The reasoning matters as much as the choice.</p>
+    <div class="rejected">
+      <div class="rej"><div class="rt2"><span class="x">×</span>Remittance-first app</div><p>The most relatable expat need — but a crowded, price-driven race (Wio, Botim, the banks) that sidesteps the Islamic-finance depth that is actually my edge.</p></div>
+      <div class="rej"><div class="rt2"><span class="x">×</span>Youth / teen banking</div><p>Open and playful, but a weaker seniority signal — and ADIB's Amwali already owns the Islamic-youth niche.</p></div>
+      <div class="rej"><div class="rt2"><span class="x">×</span>A full super-app</div><p>Tempting for scope, but Liv.'s over-reach showed it buries clarity. I chose depth on one meaningful flow over breadth.</p></div>
+      <div class="rej"><div class="rt2"><span class="x">×</span>Gold-savings as the hero</div><p>Culturally strong, and it stayed in the build — but Zakat read as the higher-emotion, more distinctive story, so it leads instead.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="secnum">13</div>
+    <h2>How I'd validate &amp; measure it</h2>
+    <p>I scoped this as a concept to pressure-test the strategy and the craft. Validation with users is the next phase — and I defined the plan and the success metrics up front, so the bar is set beforehand rather than after the fact. It draws on the known drivers of Islamic-fintech adoption: Sharia-compliance, ease of use, perceived benefit, Islamic Social Responsibility and trust.</p>
+    <div class="lex">
+      <div class="term"><div class="t">Method</div><p>5–7 moderated usability sessions, Arabic-first, remote and in-person across Abu Dhabi and Dubai.</p></div>
+      <div class="term"><div class="t">Participants</div><p>Emirati Muslims who pay Zakat and hold some wealth in gold; a spread of ages and digital confidence.</p></div>
+      <div class="term"><div class="t">Key tasks</div><p>Onboard via UAE PASS; assemble assets and read the Zakat figure; choose the Nisab basis; give across the eight asnaf.</p></div>
+      <div class="term"><div class="t">What I'd measure</div><p>Task completion and time, comprehension of "profit, not interest", trust in the Zakat number, reception of the du'a moment, and the Western-vs-Arabic-Indic numerals preference.</p></div>
+    </div>
+    <div class="figs">
+      <div class="f"><b>≥20%</b><span>DAU/MAU target — a strong ratio for fintech</span></div>
+      <div class="f"><b>≥80%</b><span>target completion of the Zakat flow, unaided</span></div>
+      <div class="f"><b>&lt;2 min</b><span>onboarding to first live Zakat estimate</span></div>
+    </div>
+    <div class="insight"><div class="lab">Set before testing</div><p>Defining the tasks and metrics in advance is deliberate — success is measured against a bar set beforehand, not graded on a curve afterwards. The discussion guide is ready to run; I'd revise the hero flow on the findings, with the Zakat content scholar-reviewed before any release.</p></div>
+    <!-- WHAT TESTING CHANGED — after running sessions, paste this block here uncommented, filled from usability-results-tracker.xlsx:
+    <h3 style="margin-top:32px;">What testing changed</h3>
+    <div class="findings">
+      <div class="finding"><div class="fnum">01</div><div><h4>What users did</h4><p>3 of 5 users missed the Nisab-basis step, so I made it a required step with a plain-language default. <i>"I didn't see that part."</i></p><div class="ftag">from: usability testing · n=5</div></div></div>
+      <div class="finding"><div class="fnum">02</div><div><h4>…</h4><p>…</p><div class="ftag">from: usability testing</div></div></div>
+    </div>
+    -->
+
+  </section>
+
+  <section>
+    <div class="secnum">14</div>
+    <h2>Scope, constraints &amp; feasibility</h2>
+    <p>A real product lives inside constraints; designing as if they didn't exist is the giveaway of a concept. Here's the reality I designed against — and how each shaped a decision.</p>
+    <div class="lex">
+      <div class="term"><div class="t">Regulatory path</div><p>For an Islamic retail product I'd target the <b>CBUAE</b> mainland framework, with a <b>DFSA Innovation Testing Licence</b> pilot in the DIFC as a faster route to test with live users. Either way, KYC runs on Emirates ID / UAE PASS — which is why onboarding is built around them.</p></div>
+      <div class="term"><div class="t">Sharia governance</div><p>"Sharia-compliant" isn't a checkbox: it needs a <b>Sharia Supervisory Board</b> and AAOIFI-aligned controls, with the DFSA acting as a "Shari'a systems regulator". That's why compliance is a <i>visible, certified product layer</i> — "profit, not interest", and on-screen assurance — not a badge.</p></div>
+      <div class="term"><div class="t">Build model</div><p>An MVP would most realistically launch on a <b>partner-bank / BaaS licence</b> (as YAP did with Ruya) rather than a full bank licence — keeping the first release tight and shippable.</p></div>
+      <div class="term"><div class="t">The wider shift</div><p>This rides rails arriving fast: <b>Open Finance</b> (the CBUAE's AlTareq; ADIB is the first licensed TPP), <b>fractional "Smart" Sukuk</b> from ~$1,000, and early <b>tokenisation</b> pilots — the roadmap beyond the MVP.</p></div>
+    </div>
+    <div class="insight"><div class="lab">On staying in my lane</div><p>I'm a designer, not a compliance or platform lead — but designing without these in view produces work that can't ship. Knowing the terrain is what made the trade-offs — UAE PASS-first, visible compliance, a tight MVP — deliberate rather than accidental.</p></div>
+  </section>
+
+  <section>
+    <div class="secnum">15</div>
+    <h2>Reflection &amp; next steps</h2>
+    <p>Treating this as a concept was the point: the aim is to show how I read an unfamiliar, high-context market and turn it into product decisions — market understanding, research and RTL craft. Validation with users is the defined next phase (the plan and metrics are in §13), and the Zakat content would be scholar-reviewed before any release.</p>
+    <p class="small muted">In my portfolio this sits alongside shipped, team-delivered work; here the intent was to show how I'd approach an unfamiliar, high-context market from first principles.</p>
+    <h3>Sources</h3>
+    <p class="sources">Central Bank of the UAE &amp; Al Etihad Payments (Aani) · TDRA / ICP (UAE PASS, Emirates ID, National KYC Platform) · Federal Decree-Law No. 30 of 2024 · DFSA (Innovation Testing Licence, Islamic endorsement) · CBUAE Open Finance / AlTareq · World Gold Council &amp; AAOIFI (Shariah gold standard) · company disclosures (ADIB scale &amp; Open Finance; Wio backing &amp; licence) · App-store listings &amp; reviews for ADIB, Dubai Islamic Bank, Emirates Islamic, Liv., Wio, YAP · Euromoney Middle East (Wio award) · Gulf News, The National (market reporting) · Islamic-finance references on Zakat, Nisab, Hawl, Riba and the asnaf.</p>
+  </section>
+
+</div>
+
+<footer>
+  Amânah · self-initiated concept · designed in Figma-grade fidelity, prototyped in code.<br>
+  <span class="muted">All screens above are the live, interactive prototype — try it at <a href="../amanah-prototype/index.html">amanah-prototype/index.html</a>.</span>
+</footer>
+
+<script>
+(function(){
+  const RAD={axes:['Onboarding','Islamic','Craft','Reliability','Insights'],
+    apps:[{n:'ADIB',s:[4,4,3,2,3]},{n:'DIB',s:[4,3,2,2,3]},{n:'Liv.',s:[4,1,4,2,3]},{n:'Wio',s:[5,1,5,3,5]},{n:'YAP',s:[4,1,3,2,3]}]};
+  const N=RAD.axes.length, cx=76, cy=80, R=52, MAX=5;
+  function pt(i,rr){const a=-Math.PI/2+i*2*Math.PI/N; return [cx+rr*Math.cos(a), cy+rr*Math.sin(a)];}
+  function radar(app){
+    let g='';
+    [0.5,1].forEach(f=>{let p=[];for(let i=0;i<N;i++){const[x,y]=pt(i,R*f);p.push(x.toFixed(1)+','+y.toFixed(1));}g+='<polygon points="'+p.join(' ')+'" fill="none" stroke="#E5DFD2"/>';});
+    for(let i=0;i<N;i++){const[x,y]=pt(i,R);g+='<line x1="'+cx+'" y1="'+cy+'" x2="'+x.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="#E5DFD2"/>';}
+    let p=[];app.s.forEach((v,i)=>{const[x,y]=pt(i,R*v/MAX);p.push(x.toFixed(1)+','+y.toFixed(1));});
+    g+='<polygon points="'+p.join(' ')+'" fill="rgba(15,61,46,.15)" stroke="#0F3D2E" stroke-width="2"/>';
+    app.s.forEach((v,i)=>{const[x,y]=pt(i,R*v/MAX);g+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="2.4" fill="#0F3D2E"/>';});
+    return '<svg viewBox="0 0 152 150" width="152" height="150">'+g+'</svg>';
+  }
+  const rc=document.getElementById('radars');
+  if(rc){ rc.innerHTML=RAD.apps.map(a=>'<div class="radarcard">'+radar(a)+'<div class="rn">'+a.n+'</div></div>').join('');
+    document.getElementById('radaxes').innerHTML=RAD.axes.map(a=>'<span>'+a+'</span>').join(''); }
+  const H=document.getElementById('hawl');
+  if(H){
+    const hx=150, hy=150, r=108, C=2*Math.PI*r, prog=0.91;
+    let ticks='';
+    for(let k=0;k<12;k++){const a=2*Math.PI*k/12; const x1=hx+118*Math.sin(a),y1=hy-118*Math.cos(a),x2=hx+128*Math.sin(a),y2=hy-128*Math.cos(a); ticks+='<line x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'" stroke="#D8D0BF" stroke-width="2"/>';}
+    const tx=hx+r*Math.sin(2*Math.PI*prog), ty=hy-r*Math.cos(2*Math.PI*prog);
+    H.innerHTML='<svg viewBox="0 0 300 300" width="300" height="300" role="img" aria-label="Circular Hawl-year clock: 91% complete, Zakat due in 24 days.">'
+      +ticks
+      +'<circle cx="150" cy="150" r="108" fill="none" stroke="#EBE4D6" stroke-width="11"/>'
+      +'<circle cx="150" cy="150" r="108" fill="none" stroke="#9C7A3C" stroke-width="11" stroke-linecap="round" stroke-dasharray="'+(C*prog).toFixed(1)+' '+C.toFixed(1)+'" transform="rotate(-90 150 150)"/>'
+      +'<circle cx="150" cy="42" r="6" fill="#FBFAF6" stroke="#9C7A3C" stroke-width="2.5"/>'
+      +'<circle cx="'+tx.toFixed(1)+'" cy="'+ty.toFixed(1)+'" r="12" fill="none" stroke="#9C7A3C" stroke-opacity=".3" stroke-width="2"/>'
+      +'<circle cx="'+tx.toFixed(1)+'" cy="'+ty.toFixed(1)+'" r="7" fill="#9C7A3C"/>'
+      +'<text x="150" y="143" text-anchor="middle" font-family="Fraunces,serif" font-size="46" fill="#0F3D2E">91%</text>'
+      +'<text x="150" y="165" text-anchor="middle" font-size="12" fill="#6F776F">of Hawl complete</text>'
+      +'<text x="150" y="186" text-anchor="middle" font-size="12.5" font-weight="600" fill="#7E6230">≈ AED 3,450 due</text>'
+      +'</svg>';
+  }
+})();
+</script>
+
+<script>
+(function(){
+  var prog = document.getElementById('prog');
+  function onScroll(){ var h=document.documentElement; var max=h.scrollHeight-h.clientHeight; if(prog) prog.style.width=(max>0?(h.scrollTop/max*100):0)+'%'; }
+  window.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  document.body.classList.add('anim');
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, {threshold:0.1, rootMargin:'0px 0px -7% 0px'});
+  [].slice.call(document.querySelectorAll('header.hero, section')).forEach(function(sec){
+    var kids = sec.children.length ? [].slice.call(sec.children) : [sec];
+    kids.forEach(function(k,i){ k.classList.add('reveal'); k.style.transitionDelay = Math.min(i*55,240)+'ms'; io.observe(k); });
+  });
+})();
+</script>
+
+</body>
+</html>

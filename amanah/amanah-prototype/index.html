@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Amânah — prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.24.0/dist/tabler-icons.min.css" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F4F1E9; --surface:#FBFAF6; --surface-2:#F0ECE2;
+    --ink:#16201C; --ink-soft:#43504A; --muted:#7C857E; --faint:#A7AEA6;
+    --line:#E7E1D5; --line-2:#DCD5C6;
+    --pine:#0F3D2E; --pine-2:#0A2E22; --pine-soft:#1C5A45; --pine-tint:#E8EEE9;
+    --brass:#9C7A3C; --brass-2:#7E6230; --brass-soft:#C7A867; --brass-bg:#F0E8D6;
+    --r-sm:10px; --r:14px; --r-md:18px; --r-lg:22px;
+    --serif:'Fraunces',Georgia,serif; --sans:'Plus Jakarta Sans',system-ui,sans-serif; --ar:'IBM Plex Sans Arabic',system-ui,sans-serif;
+    --sh-card:0 1px 2px rgba(20,32,28,.03), 0 6px 20px rgba(20,32,28,.04);
+    --sh-hero:0 18px 44px rgba(15,61,46,.22);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{margin:0; background:#D9D5CB; font-family:var(--sans); color:var(--ink); display:flex; flex-direction:column; align-items:center; gap:12px; padding:30px 12px 46px; min-height:100vh;}
+  body.embed{padding:0; background:transparent; gap:0; min-height:0;}
+  body.embed #helper{display:none;}
+  [dir="rtl"] .app{font-family:var(--ar);}
+  .app{width:392px; height:812px; background:#0c0c0c; border-radius:54px; padding:11px; box-shadow:0 40px 90px rgba(0,0,0,.3); position:relative; color:var(--ink);}
+  .screenwrap{width:100%; height:100%; background:var(--bg); border-radius:44px; overflow:hidden; position:relative; display:flex; flex-direction:column;}
+  .notch{position:absolute; top:13px; left:50%; transform:translateX(-50%); width:118px; height:30px; background:#0c0c0c; border-radius:18px; z-index:60;}
+  .statusbar{height:54px; flex:none; display:flex; align-items:flex-end; justify-content:space-between; padding:0 30px 7px; font-size:13.5px; font-weight:600; z-index:40;}
+  .statusbar .dots{display:flex; gap:6px; align-items:center; font-size:15px;}
+  .statusbar.light, .statusbar.light .dots{color:#fff;}
+  .homebar{position:absolute; bottom:9px; left:50%; transform:translateX(-50%); width:128px; height:5px; border-radius:3px; background:rgba(20,32,28,.22); z-index:60;}
+  .screens{flex:1; position:relative; overflow:hidden;}
+  .screen{position:absolute; inset:0; display:none; flex-direction:column; overflow-y:auto; overflow-x:hidden;}
+  .screen.active{display:flex; animation:fade .3s cubic-bezier(.2,.6,.3,1);}
+  @keyframes fade{from{opacity:0; transform:translateY(7px);} to{opacity:1; transform:none;}}
+  .screen::-webkit-scrollbar{display:none;}
+  /* type */
+  .display{font-family:var(--serif); font-optical-sizing:auto; letter-spacing:-.5px; font-weight:500;}
+  .num{font-variant-numeric:tabular-nums;}
+  .kicker{font-size:11px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--faint);}
+  .small{font-size:13px;} .xsmall{font-size:11.5px;}
+  .muted{color:var(--muted);} .faint{color:var(--faint);}
+  /* header */
+  .hdr{display:flex; align-items:center; justify-content:space-between; padding:4px 22px 12px; flex:none;}
+  .hdr .title{font-size:18px; font-weight:600; letter-spacing:-.2px;}
+  .iconbtn{width:40px; height:40px; border:none; background:transparent; color:var(--ink-soft); font-size:21px; display:flex; align-items:center; justify-content:center; cursor:pointer; border-radius:50%; transition:background .15s;}
+  .iconbtn:active{background:var(--surface-2);}
+  .body{padding:2px 22px 30px; flex:1;}
+  .divider{height:1px; background:var(--line); margin:16px 0;}
+  /* hero */
+  .hero{position:relative; border-radius:24px; padding:26px 24px; color:#fff; overflow:hidden; background:radial-gradient(120% 140% at 85% 0%, #1C5A45 0%, #0F3D2E 48%, #0A2E22 100%); box-shadow:var(--sh-hero);}
+  .hero .orn{position:absolute; opacity:.07; width:200px; height:200px; pointer-events:none; top:-30px;}
+  .ltr .hero .orn{right:-30px;} .rtl .hero .orn{left:-30px;}
+  .hero .kicker{color:rgba(199,168,103,.9);}
+  .hero .bal{font-size:42px; line-height:1; margin:10px 0 0;}
+  .hero .bal .cur{font-family:var(--sans); font-size:16px; font-weight:500; letter-spacing:0; color:rgba(255,255,255,.75); margin-inline-start:4px;}
+  .hero .sub{display:flex; align-items:center; gap:7px; margin-top:14px; font-size:13px; color:rgba(255,255,255,.78);}
+  .hero .sub b{color:#fff; font-weight:600;}
+  .wm{position:absolute; top:22px; font-family:var(--serif); font-size:15px; font-weight:500; letter-spacing:1px; color:rgba(255,255,255,.9); display:flex; align-items:center; gap:6px;}
+  .ltr .wm{right:24px;} .rtl .wm{left:24px;}
+  /* quick actions */
+  .qact{display:flex; gap:8px; margin-top:22px;}
+  .qbtn{flex:1; background:none; border:none; font-family:inherit; display:flex; flex-direction:column; align-items:center; gap:9px; font-size:12.5px; font-weight:500; color:var(--ink-soft); cursor:pointer;}
+  .qc{width:54px; height:54px; border-radius:50%; background:var(--surface); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:22px; color:var(--pine); transition:transform .15s;}
+  .qbtn:active .qc{transform:scale(.94);}
+  .qbtn.accent .qc{background:var(--pine); color:#fff; border-color:var(--pine);}
+  /* cards */
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:18px; box-shadow:var(--sh-card);}
+  .list{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:2px 18px; box-shadow:var(--sh-card);}
+  .row{display:flex; align-items:center; justify-content:space-between; padding:15px 0; border-bottom:1px solid var(--line);}
+  .row:last-child{border-bottom:none;}
+  .row .l{display:flex; align-items:center; gap:13px; font-size:14.5px; font-weight:500;}
+  .row .v{font-size:14.5px; font-weight:600;}
+  .tile{width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; flex:none; background:var(--pine-tint); color:var(--pine);}
+  .tile.brass{background:var(--brass-bg); color:var(--brass);}
+  .tile.neutral{background:var(--surface-2); color:var(--muted);}
+  /* zakat intelligence card */
+  .zcard{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:18px; box-shadow:var(--sh-card);}
+  .ring{position:relative; flex:none;}
+  .ring .rt{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1;}
+  .ring .rt b{font-family:var(--serif); font-size:17px; font-weight:500;} .ring .rt span{font-size:9px; color:var(--muted); margin-top:2px; letter-spacing:.04em;}
+  .status{display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:600; color:var(--pine-soft); background:var(--pine-tint); padding:3px 9px; border-radius:20px;}
+  .status .d{width:6px; height:6px; border-radius:50%; background:var(--pine-soft);}
+  .lunar{height:5px; border-radius:4px; background:var(--surface-2); overflow:hidden; margin:12px 0 7px;}
+  .lunar span{display:block; height:100%; background:var(--brass-soft); border-radius:4px;}
+  /* timeline */
+  .tl{display:flex; position:relative; margin:6px 0 2px;}
+  .tl::before{content:""; position:absolute; top:5px; inset-inline-start:14%; inset-inline-end:14%; height:2px; background:var(--line);}
+  .tl-step{flex:1; text-align:center; position:relative; z-index:1;}
+  .tl-dot{display:block; width:12px; height:12px; border-radius:50%; background:var(--line); margin:0 auto 9px; border:3px solid var(--bg);}
+  .tl-step.done .tl-dot{background:var(--pine);}
+  .tl-step.active .tl-dot{background:var(--brass); box-shadow:0 0 0 4px var(--brass-bg);}
+  .tl-lbl{font-size:12px; font-weight:600;} .tl-sub{font-size:10.5px; color:var(--faint); margin-top:2px;}
+  /* alloc + legend */
+  .alloc{display:flex; height:10px; border-radius:6px; overflow:hidden; margin:14px 0 12px;}
+  .alloc span{height:100%;}
+  .legend{display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--muted);}
+  .legend i{width:8px; height:8px; border-radius:2px; display:inline-block; margin-inline-end:7px;}
+  .note{display:flex; align-items:flex-start; gap:8px; font-size:12.5px; color:var(--muted); margin-top:14px; line-height:1.55;}
+  .note i{color:var(--pine-soft); font-size:16px; flex:none; margin-top:1px;}
+  /* cta + buttons */
+  .cta-wrap{padding:14px 22px 22px; flex:none; background:linear-gradient(to top, var(--bg) 72%, transparent);}
+  .btn{width:100%; border:none; border-radius:var(--r); padding:16px; font-size:15.5px; font-weight:600; font-family:inherit; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:9px; transition:transform .15s; letter-spacing:.01em;}
+  .btn:active{transform:scale(.985);}
+  .btn.primary{background:var(--pine); color:#fff;}
+  .btn.primary:active{background:var(--pine-2);}
+  .btn.ghost{background:var(--surface); color:var(--ink); border:1px solid var(--line);}
+  .btn.white{background:#fff; color:var(--pine);}
+  .btn.sm{padding:13px; font-size:14px; border-radius:12px;}
+  /* options */
+  .opt{background:var(--surface); border:1.5px solid var(--line); border-radius:var(--r-md); padding:16px; margin-bottom:12px; cursor:pointer; display:flex; align-items:center; gap:13px; transition:.16s;}
+  .opt.sel{border-color:var(--pine); background:var(--surface);}
+  .opt .check{width:22px; height:22px; border-radius:50%; border:1.5px solid var(--line-2); display:flex; align-items:center; justify-content:center; color:#fff; font-size:13px; flex:none;}
+  .opt.sel .check{background:var(--pine); border-color:var(--pine);}
+  .badge{font-size:10.5px; font-weight:600; padding:3px 8px; border-radius:6px; background:var(--pine-tint); color:var(--pine-soft); display:inline-flex; align-items:center; gap:4px; vertical-align:middle; letter-spacing:.02em;}
+  .badge.brass{background:var(--brass-bg); color:var(--brass-2);}
+  .av{width:44px; height:44px; border-radius:13px; flex:none; display:flex; align-items:center; justify-content:center; font-size:21px; color:#fff;}
+  /* nav */
+  .nav{display:flex; padding:9px 12px 16px; flex:none; background:var(--surface); border-top:1px solid var(--line);}
+  .tab{flex:1; background:none; border:none; font-family:inherit; display:flex; flex-direction:column; align-items:center; gap:5px; font-size:10.5px; font-weight:500; color:var(--faint); cursor:pointer; letter-spacing:.02em;}
+  .tab .dot{width:5px; height:5px; border-radius:50%; background:var(--pine); opacity:0; margin-bottom:-1px;}
+  .tab i{font-size:23px;}
+  .tab.on{color:var(--pine);} .tab.on .dot{opacity:1;} .tab.on i{color:var(--pine);}
+  /* home top */
+  .greetrow{display:flex; align-items:center; justify-content:space-between; padding:6px 22px 14px;}
+  .greet{font-size:13px; color:var(--muted); font-weight:500;} .greetn{font-size:22px; font-weight:600; letter-spacing:-.4px; margin-top:2px;}
+  .uav{width:44px; height:44px; border-radius:50%; background:var(--pine); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:15px; font-family:var(--serif);}
+  .topicons{display:flex; gap:6px; align-items:center;}
+  .sechead{display:flex; align-items:center; justify-content:space-between; margin:24px 4px 12px;}
+  .sechead .kicker{margin:0;}
+  .sechead a{font-size:13px; color:var(--pine-soft); font-weight:600; text-decoration:none;}
+  /* settings */
+  .setrow{display:flex; align-items:center; justify-content:space-between; padding:15px 0; border-bottom:1px solid var(--line);}
+  .setrow:last-child{border-bottom:none;}
+  .setrow .l{display:flex; align-items:center; gap:13px; font-size:14.5px; font-weight:500;}
+  .seg{display:flex; background:var(--surface-2); border-radius:11px; padding:3px; gap:3px;}
+  .seg button{border:none; background:none; font-family:inherit; font-size:13px; font-weight:600; padding:7px 13px; border-radius:8px; cursor:pointer; color:var(--muted); transition:.15s;}
+  .seg button.on{background:#fff; color:var(--pine); box-shadow:0 1px 2px rgba(0,0,0,.06);}
+  /* donut */
+  .donutwrap{position:relative; width:164px; margin:10px auto 6px;}
+  .donutwrap .dt{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  .donutwrap .dt b{font-family:var(--serif); font-size:30px; font-weight:500; color:var(--pine);} .donutwrap .dt span{font-size:11.5px; color:var(--muted); letter-spacing:.04em; margin-top:2px;}
+  /* succ */
+  .succ{position:relative; width:142px; height:142px; margin:20px auto 0;}
+  .succ .ros{position:absolute; inset:0; opacity:.85;}
+  .chk{width:74px; height:74px; border-radius:50%; background:var(--pine); color:#fff; display:flex; align-items:center; justify-content:center; font-size:38px;}
+  .succ .chk{position:absolute; inset:0; margin:auto;}
+  /* onboarding */
+  .onboard{position:absolute; inset:0; background:radial-gradient(130% 120% at 80% 0%, #1C5A45 0%, #0F3D2E 50%, #0A2E22 100%); color:#fff; display:flex; flex-direction:column; padding:0 30px 28px; overflow:hidden;}
+  .onboard .orn{position:absolute; opacity:.08; width:440px; height:440px; top:-100px; left:50%; transform:translateX(-50%); pointer-events:none;}
+  .oblogo{width:74px; height:74px; border-radius:22px; background:rgba(255,255,255,.12); display:flex; align-items:center; justify-content:center; font-size:36px; color:#fff;}
+  .obwm{font-family:var(--serif); font-size:33px; font-weight:500; letter-spacing:2px; margin-top:20px;}
+  .obtag{font-size:15.5px; color:rgba(199,168,103,.95); margin-top:10px; max-width:220px; line-height:1.5;}
+  .prow{display:flex; align-items:center; gap:14px; padding:10px 0; font-size:15px; font-weight:400; color:rgba(255,255,255,.92); position:relative; z-index:2;}
+  .prow .pc{width:40px; height:40px; border-radius:12px; background:rgba(255,255,255,.1); display:flex; align-items:center; justify-content:center; font-size:20px; color:var(--brass-soft); flex:none;}
+  .bigopt{display:flex; align-items:center; gap:14px; width:100%; border:none; background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md); padding:17px; box-shadow:var(--sh-card); cursor:pointer; text-align:start; font-family:inherit; margin-bottom:12px; color:var(--ink); transition:transform .15s;}
+  .bigopt:active{transform:scale(.985);}
+  .bigopt.pass{background:var(--pine); color:#fff; border-color:var(--pine);}
+  .bigopt .bt{font-size:15.5px; font-weight:600;} .bigopt .bn{font-size:12.5px; margin-top:3px; color:var(--muted);}
+  .bigopt.pass .bn{color:rgba(199,168,103,.95);}
+  .passtile{width:44px; height:44px; border-radius:12px; background:rgba(255,255,255,.14); display:flex; align-items:center; justify-content:center; font-size:22px; flex:none;}
+  /* switch + chips */
+  .switch{width:48px; height:28px; border-radius:16px; background:var(--line-2); position:relative; transition:.2s; cursor:pointer; flex:none;}
+  .switch.on{background:var(--pine);}
+  .switch .knob{position:absolute; top:3px; inset-inline-start:3px; width:22px; height:22px; border-radius:50%; background:#fff; transition:.2s; box-shadow:0 1px 3px rgba(0,0,0,.2);}
+  .switch.on .knob{inset-inline-start:23px;}
+  .spark{width:100%; height:44px; display:block; margin-top:12px;}
+  .chip{flex:1; border:1.5px solid var(--line-2); background:var(--surface); border-radius:12px; padding:13px 4px; font-family:var(--serif); font-size:16px; font-weight:500; cursor:pointer; color:var(--ink); transition:.15s;}
+  .chip.on{border-color:var(--pine); background:var(--pine-tint); color:var(--pine);}
+  .flip{display:inline-block;} [dir="rtl"] .flip{transform:scaleX(-1);}
+  .hijri{font-size:12px; color:var(--brass-2); font-weight:500; margin-top:3px;}
+  .dotbadge{position:absolute; top:9px; inset-inline-end:10px; width:8px; height:8px; border-radius:50%; background:#C0504C; border:2px solid var(--bg);}
+  .tag{display:inline-flex; align-items:center; gap:3px; font-size:10px; font-weight:600; color:var(--brass-2); background:var(--brass-bg); padding:2px 6px; border-radius:6px;}
+  .amt-in{color:var(--pine-soft);}
+  .heroline{font-size:11px; color:rgba(255,255,255,.6); margin-top:12px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
+  .alertbar{display:flex; align-items:center; gap:9px; width:100%; border:none; background:#F7E7E2; color:#9A3835; border-radius:14px; padding:12px 15px; font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; margin-top:18px; text-align:start;}
+  .alertbar .ti-chevron-right{margin-inline-start:auto; font-size:16px;}
+  .statcard{flex:1; background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md); padding:15px; box-shadow:var(--sh-card);}
+  .numtile{width:34px; height:34px; border-radius:10px; background:var(--pine-tint); color:var(--pine); display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-weight:600; font-size:16px; flex:none;}
+  .app.dark{ --bg:#0C1512; --surface:#15211C; --surface-2:#1E2C25; --ink:#F0EDE4; --ink-soft:#C2CBC4; --muted:#8C958D; --faint:#697169; --line:#26312B; --line-2:#313D36; --pine-tint:#1C3028; --brass-bg:#2B2417; --pine:#3E9C7E; --pine-soft:#62B89A; --pine-2:#2E7A60; }
+  .app.dark .btn.primary{background:#5FB89A; color:#0A1A14;}
+  .app.dark .btn.ghost{background:var(--surface);}
+  .app.dark .seg button.on{background:var(--surface);}
+  .app.dark .chip.on{background:#1C3028; color:#9FE1CB;}
+</style>
+</head>
+<body>
+<div class="app ltr" id="app" dir="ltr">
+  <div class="notch"></div>
+  <div class="screenwrap">
+  <div class="screens">
+
+    <!-- ONBOARDING: WELCOME -->
+    <section class="screen active" id="s-onboard">
+      <div class="onboard">
+        <svg class="orn" viewBox="0 0 200 200"><g fill="none" stroke="#fff" stroke-width="1"><circle cx="100" cy="100" r="94"/><circle cx="100" cy="100" r="62"/><circle cx="100" cy="100" r="34"/><path d="M100 6 L194 100 L100 194 L6 100 Z"/><path d="M34 34 L166 34 L166 166 L34 166 Z"/><path d="M100 6 L100 194 M6 100 L194 100 M34 34 L166 166 M166 34 L34 166"/></g></svg>
+        <div class="statusbar light"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+        <div style="display:flex; justify-content:flex-end; padding:2px 0;"><button class="iconbtn" style="color:#fff;" onclick="quickLang()"><i class="ti ti-language"></i></button></div>
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; position:relative; z-index:2;">
+          <div class="oblogo"><i class="ti ti-diamond"></i></div>
+          <div class="obwm">AMÂNAH</div>
+          <div class="obtag" data-i18n="obTagline"></div>
+        </div>
+        <div style="position:relative; z-index:2; margin-bottom:10px;">
+          <div class="prow"><span class="pc"><i class="ti ti-moon-stars"></i></span><span data-i18n="obP1"></span></div>
+          <div class="prow"><span class="pc"><i class="ti ti-coins"></i></span><span data-i18n="obP2"></span></div>
+          <div class="prow"><span class="pc"><i class="ti ti-language"></i></span><span data-i18n="obP3"></span></div>
+        </div>
+        <button class="btn white" style="position:relative; z-index:2; margin-top:14px;" onclick="go('s-uaepass')"><span data-i18n="getStarted"></span> <i class="ti ti-arrow-left flip"></i></button>
+      </div>
+    </section>
+
+    <!-- ONBOARDING: IDENTITY CHOICE -->
+    <section class="screen" id="s-uaepass">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="hdr"><button class="iconbtn" data-back><i class="ti ti-chevron-left flip"></i></button><div class="title" data-i18n="openAccount"></div><span style="width:40px;"></span></div>
+      <div class="body">
+        <p style="font-size:15px; color:var(--ink-soft); line-height:1.6; margin-top:0;" data-i18n="verifySeconds"></p>
+        <button class="bigopt pass" onclick="go('s-consent')" style="margin-top:18px;">
+          <span class="passtile"><i class="ti ti-shield-check"></i></span>
+          <div style="flex:1;"><div class="bt" data-i18n="contUaePass"></div><div class="bn" data-i18n="uaePassNote"></div></div>
+          <i class="ti ti-arrow-left flip"></i>
+        </button>
+        <button class="bigopt" onclick="go('s-consent')">
+          <span class="tile"><i class="ti ti-id"></i></span>
+          <div style="flex:1;"><div class="bt" data-i18n="useEid"></div><div class="bn" data-i18n="eidNote"></div></div>
+          <i class="ti ti-chevron-right flip faint"></i>
+        </button>
+        <div class="note"><i class="ti ti-lock"></i> <span data-i18n="govNote"></span></div>
+      </div>
+    </section>
+
+    <!-- ONBOARDING: CONSENT -->
+    <section class="screen" id="s-consent">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="hdr"><button class="iconbtn" data-back><i class="ti ti-chevron-left flip"></i></button><div class="title">UAE PASS</div><span style="width:40px;"></span></div>
+      <div class="body">
+        <div style="text-align:center; padding:8px 0 18px;">
+          <div class="oblogo" style="margin:0 auto; background:var(--pine-tint); color:var(--pine);"><i class="ti ti-shield-check"></i></div>
+          <div style="font-size:17px; font-weight:600; margin-top:14px;" data-i18n="requestAccess"></div>
+        </div>
+        <div class="list">
+          <div class="row"><span class="l"><span class="tile" style="width:34px; height:34px; font-size:17px;"><i class="ti ti-user"></i></span> <span data-i18n="dName"></span></span><i class="ti ti-check" style="color:var(--pine-soft);"></i></div>
+          <div class="row"><span class="l"><span class="tile" style="width:34px; height:34px; font-size:17px;"><i class="ti ti-id"></i></span> <span data-i18n="dEid"></span></span><i class="ti ti-check" style="color:var(--pine-soft);"></i></div>
+          <div class="row"><span class="l"><span class="tile" style="width:34px; height:34px; font-size:17px;"><i class="ti ti-world"></i></span> <span data-i18n="dNat"></span></span><i class="ti ti-check" style="color:var(--pine-soft);"></i></div>
+          <div class="row"><span class="l"><span class="tile" style="width:34px; height:34px; font-size:17px;"><i class="ti ti-calendar"></i></span> <span data-i18n="dDob"></span></span><i class="ti ti-check" style="color:var(--pine-soft);"></i></div>
+          <div class="row"><span class="l"><span class="tile" style="width:34px; height:34px; font-size:17px;"><i class="ti ti-map-pin"></i></span> <span data-i18n="dAddr"></span></span><i class="ti ti-check" style="color:var(--pine-soft);"></i></div>
+        </div>
+        <div class="note"><i class="ti ti-info-circle"></i> <span data-i18n="consentNote"></span></div>
+      </div>
+      <div class="cta-wrap"><button class="btn primary" onclick="go('s-welcome-done')"><i class="ti ti-shield-check"></i> <span data-i18n="approve"></span></button></div>
+    </section>
+
+    <!-- ONBOARDING: READY -->
+    <section class="screen" id="s-welcome-done">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="body" style="text-align:center; display:flex; flex-direction:column;">
+        <div class="succ">
+          <svg class="ros" viewBox="0 0 142 142"><g fill="none" stroke="#9C7A3C" stroke-width="1.2"><circle cx="71" cy="71" r="66"/><circle cx="71" cy="71" r="49"/><path d="M71 5 L137 71 L71 137 L5 71 Z"/><path d="M25 25 L117 25 L117 117 L25 117 Z"/><path d="M71 5 L71 137 M5 71 L137 71 M25 25 L117 117 M117 25 L25 117"/></g></svg>
+          <div class="chk"><i class="ti ti-check"></i></div>
+        </div>
+        <div class="display" style="font-size:25px; margin-top:24px;" data-i18n="welcomeTitle"></div>
+        <div class="muted" style="font-size:14.5px; margin-top:8px;" data-i18n="accountReady"></div>
+        <div class="list" style="margin-top:26px; text-align:start;">
+          <div class="row"><span class="l"><span class="tile"><i class="ti ti-wallet"></i></span> <span data-i18n="accType"></span></span><i class="ti ti-circle-check" style="color:var(--pine-soft);"></i></div>
+          <div class="row"><span class="muted l">IBAN</span><span style="font-weight:600;" class="num">AE•• 4821</span></div>
+        </div>
+      </div>
+      <div class="cta-wrap"><button class="btn primary" onclick="go('s-home')"><span data-i18n="enterApp"></span> <i class="ti ti-arrow-left flip"></i></button></div>
+    </section>
+
+    <!-- HOME -->
+    <section class="screen" id="s-home">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="greetrow">
+        <div><div class="greet" data-i18n="greet"></div><div class="greetn" data-i18n="greetName"></div><div class="hijri" data-i18n="hijri"></div></div>
+        <div class="topicons">
+          <button class="iconbtn" onclick="go('s-notifs')" style="position:relative;"><i class="ti ti-bell"></i><span class="dotbadge"></span></button>
+          <button class="iconbtn" onclick="quickLang()"><i class="ti ti-language"></i></button>
+          <div class="uav" data-i18n="avatar"></div>
+        </div>
+      </div>
+      <div class="body" style="padding-top:0;">
+        <div class="hero">
+          <svg class="orn" viewBox="0 0 200 200"><g fill="none" stroke="#fff" stroke-width="1.2"><circle cx="100" cy="100" r="94"/><circle cx="100" cy="100" r="60"/><path d="M100 6 L194 100 L100 194 L6 100 Z"/><path d="M34 34 L166 34 L166 166 L34 166 Z"/></g></svg>
+          <div class="wm"><i class="ti ti-diamond" style="font-size:13px;"></i> AMÂNAH</div>
+          <div class="kicker" data-i18n="availBalance"></div>
+          <div class="bal display"><span class="num" data-count="124500">124,500</span><span class="cur" data-i18n="aed"></span></div>
+          <button class="sub" onclick="go('s-profit')" style="background:none; border:none; font-family:inherit; cursor:pointer; padding:0;"><i class="ti ti-trending-up" style="color:var(--brass-soft);"></i> <span data-i18n="profitYear"></span> <b>+<span class="num">2,150</span></b> <i class="ti ti-chevron-right flip" style="font-size:13px; opacity:.6;"></i></button>
+          <div class="heroline"><i class="ti ti-rosette-discount-check"></i> <span data-i18n="shariaUpdated"></span></div>
+        </div>
+        <div class="qact">
+          <button class="qbtn" onclick="go('s-pay')"><span class="qc"><i class="ti ti-arrow-up-right"></i></span><span data-i18n="qSend"></span></button>
+          <button class="qbtn" onclick="go('s-gold')"><span class="qc"><i class="ti ti-coins"></i></span><span data-i18n="qGold"></span></button>
+          <button class="qbtn accent" onclick="go('s-give')"><span class="qc"><i class="ti ti-heart-handshake"></i></span><span data-i18n="qGive"></span></button>
+          <button class="qbtn" onclick="alert('More — demo')"><span class="qc"><i class="ti ti-dots"></i></span><span data-i18n="qMore"></span></button>
+        </div>
+        <button class="alertbar" onclick="go('s-held')"><i class="ti ti-alert-triangle"></i> <span data-i18n="attentionHome"></span> <i class="ti ti-chevron-right flip"></i></button>
+        <div class="sechead"><span class="kicker" data-i18n="zakatTracker"></span><a onclick="go('s-zakat')" data-i18n="open"></a></div>
+        <div class="zcard">
+          <div style="display:flex; align-items:center; gap:14px;">
+            <div class="ring">
+              <svg width="58" height="58" viewBox="0 0 58 58"><circle cx="29" cy="29" r="24" fill="none" stroke="var(--surface-2)" stroke-width="5"/><circle cx="29" cy="29" r="24" fill="none" stroke="#9C7A3C" stroke-width="5" stroke-linecap="round" stroke-dasharray="140 151" transform="rotate(-90 29 29)"/></svg>
+              <div class="rt"><b class="num">24</b><span data-i18n="daysShort"></span></div>
+            </div>
+            <div style="flex:1;">
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;"><span style="font-weight:600; font-size:15.5px;" data-i18n="zakat"></span><span class="status"><span class="d"></span><span data-i18n="zStatus"></span></span></div>
+              <div class="muted small" style="margin-top:3px;" data-i18n="zHawlCompletes"></div>
+            </div>
+          </div>
+          <div class="divider" style="margin:14px 0;"></div>
+          <div style="display:flex; justify-content:space-between; align-items:baseline;"><span class="muted small" data-i18n="estZakat"></span><span class="display" style="font-size:21px; color:var(--brass-2);"><span class="num">3,450</span> <span style="font-family:var(--sans); font-size:13px; font-weight:500;" data-i18n="aed"></span></span></div>
+          <div class="lunar"><span style="width:92%;"></span></div>
+          <div class="faint xsmall" data-i18n="nisab11"></div>
+          <button class="btn primary sm" style="margin-top:16px;" onclick="go('s-zakat')"><span data-i18n="reviewZakat"></span> <i class="ti ti-arrow-left flip"></i></button>
+        </div>
+
+        <div class="sechead"><span class="kicker" data-i18n="thisMonthSpent"></span></div>
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:baseline;"><span class="display" style="font-size:24px;"><span class="num">4,820</span> <span style="font-family:var(--sans); font-size:13px; font-weight:500; color:var(--muted);" data-i18n="aed"></span></span><span class="muted small"><span class="num">64</span>% <span data-i18n="ofBudget"></span></span></div>
+          <div class="alloc" style="margin-top:12px;"><span style="width:46%; background:var(--pine);"></span><span style="width:32%; background:var(--brass);"></span><span style="width:22%; background:var(--pine-soft);"></span></div>
+          <div class="legend" style="margin-top:10px;"><span><i style="background:var(--pine);"></i><span data-i18n="catGroceries"></span></span><span><i style="background:var(--brass);"></i><span data-i18n="catDining"></span></span><span><i style="background:var(--pine-soft);"></i><span data-i18n="catFuel"></span></span></div>
+        </div>
+
+        <div class="sechead"><span class="kicker" data-i18n="recentActivity"></span><a onclick="alert('All activity — demo')" data-i18n="viewAll"></a></div>
+        <div class="list">
+          <div class="row"><span class="l"><span class="tile t"><i class="ti ti-building-bank"></i></span> <span><span style="font-weight:500;" data-i18n="mSalary"></span><br><span class="faint xsmall"><span data-i18n="catIncome"></span> · <span data-i18n="timeToday"></span></span></span></span><span class="v amt-in">+<span class="num">18,000</span></span></div>
+          <div class="row" style="cursor:pointer;" onclick="go('s-txn')"><span class="l"><span class="tile neutral"><i class="ti ti-shopping-cart"></i></span> <span><span style="font-weight:500;" data-i18n="mCarrefour"></span><br><span class="faint xsmall"><span data-i18n="catGroceries"></span> · <span data-i18n="timeToday"></span> · <span class="tag"><i class="ti ti-arrow-up" style="font-size:9px;"></i> <span class="num">0.90</span> <span data-i18n="roundupTag"></span></span></span></span></span><span class="v">−<span class="num">132.10</span></span></div>
+          <div class="row" style="cursor:pointer;" onclick="go('s-txn')"><span class="l"><span class="tile neutral"><i class="ti ti-tools-kitchen-2"></i></span> <span><span style="font-weight:500;" data-i18n="mTalabat"></span><br><span class="faint xsmall"><span data-i18n="catDining"></span> · <span data-i18n="timeToday"></span> · <span class="tag"><i class="ti ti-arrow-up" style="font-size:9px;"></i> <span class="num">0.50</span> <span data-i18n="roundupTag"></span></span></span></span></span><span class="v">−<span class="num">47.50</span></span></div>
+          <div class="row" style="cursor:pointer;" onclick="go('s-txn')"><span class="l"><span class="tile neutral"><i class="ti ti-gas-station"></i></span> <span><span style="font-weight:500;" data-i18n="mAdnoc"></span><br><span class="faint xsmall"><span data-i18n="catFuel"></span> · <span data-i18n="timeYest"></span></span></span></span><span class="v">−<span class="num">94.30</span></span></div>
+          <div class="row" style="cursor:pointer;" onclick="go('s-txn')"><span class="l"><span class="tile neutral"><i class="ti ti-car"></i></span> <span><span style="font-weight:500;" data-i18n="mSalik"></span><br><span class="faint xsmall"><span data-i18n="catToll"></span> · <span data-i18n="timeYest"></span></span></span></span><span class="v">−<span class="num">4.00</span></span></div>
+        </div>
+      </div>
+      <nav class="nav" data-nav></nav>
+    </section>
+
+    <!-- TRANSACTION DETAIL -->
+    <section class="screen" id="s-txn">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="hdr"><button class="iconbtn" data-back><i class="ti ti-chevron-left flip"></i></button><div class="title" data-i18n="txnTitle"></div><span style="width:40px;"></span></div>
+      <div class="body" style="text-align:center; display:flex; flex-direction:column;">
+        <span class="tile neutral" style="width:62px; height:62px; border-radius:18px; font-size:28px; margin:16px auto 0;"><i class="ti ti-shopping-cart"></i></span>
+        <div class="display" style="font-size:20px; margin-top:14px;" data-i18n="mCarrefour"></div>
+        <div class="display" style="font-size:34px; margin-top:4px;">−<span class="num">132.10</span> <span style="font-family:var(--sans); font-size:16px; font-weight:500; color:var(--muted);" data-i18n="aed"></span></div>
+        <div class="muted small" style="margin-top:4px;"><span data-i18n="timeToday"></span> · <span class="num">14:32</span></div>
+        <div class="list" style="margin-top:22px; text-align:start;">
+          <div class="row"><span class="muted l" data-i18n="category"></span><span style="font-weight:600;" data-i18n="catGroceries"></span></div>
+          <div class="row"><span class="muted l" data-i18n="paidVia"></span><span style="font-weight:600;" data-i18n="amanahCard"></span></div>
+          <div class="row"><span class="muted l" data-i18n="statusL"></span><span class="status"><span class="d"></span><span data-i18n="completed"></span></span></div>
+          <div class="row"><span class="muted l" data-i18n="roundupLine"></span><span class="tag"><i class="ti ti-arrow-up" style="font-size:9px;"></i> +<span class="num">0.90</span> <span data-i18n="roundupTag"></span></span></div>
+        </div>
+        <div style="display:flex; gap:12px; margin-top:16px;">
+          <button class="btn ghost sm" style="flex:1;"><i class="ti ti-arrows-split"></i> <span data-i18n="splitBill"></span></button>
+          <button class="btn ghost sm" style="flex:1;"><i class="ti ti-receipt"></i> <span data-i18n="getReceipt"></span></button>
+        </div>
+        <button class="iconbtn" style="width:auto; margin:16px auto 0; font-size:13px; color:var(--muted);" data-i18n="reportProblem"></button>
+      </div>
+    </section>
+
+    <!-- NOTIFICATIONS -->
+    <section class="screen" id="s-notifs">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="hdr"><button class="iconbtn" data-back><i class="ti ti-chevron-left flip"></i></button><div class="title" data-i18n="notifsTitle"></div><button class="iconbtn" style="width:auto; padding:0 8px; font-size:12px; color:var(--pine-soft); font-weight:600;" data-i18n="markRead"></button></div>
+      <div class="body">
+        <div class="list">
+          <div class="row" style="cursor:pointer;" onclick="go('s-held')"><span class="l"><span class="tile" style="background:#F7E7E2; color:#C0504C;"><i class="ti ti-alert-triangle"></i></span> <span><span style="font-weight:600;" data-i18n="heldNotif"></span><br><span class="faint xsmall" data-i18n="heldNotifSub"></span></span></span><span class="faint xsmall" data-i18n="stNow"></span></div>
+          <div class="row"><span class="l"><span class="tile t"><i class="ti ti-cash"></i></span> <span><span style="font-weight:600;" data-i18n="n1"></span><br><span class="faint xsmall" data-i18n="n1s"></span></span></span><span class="faint xsmall"><span class="num">2</span>h</span></div>
+          <div class="row"><span class="l"><span class="tile brass"><i class="ti ti-trending-up"></i></span> <span><span style="font-weight:600;" data-i18n="n2"></span><br><span class="faint xsmall" data-i18n="n2s"></span></span></span><span class="faint xsmall"><span class="num">5</span>h</span></div>
+          <div class="row"><span class="l"><span class="tile t"><i class="ti ti-moon"></i></span> <span><span style="font-weight:600;" data-i18n="n3"></span><br><span class="faint xsmall" data-i18n="n3s"></span></span></span><span class="faint xsmall"><span class="num">1</span>d</span></div>
+          <div class="row"><span class="l"><span class="tile brass"><i class="ti ti-heart-handshake"></i></span> <span><span style="font-weight:600;" data-i18n="n4"></span><br><span class="faint xsmall" data-i18n="n4s"></span></span></span><span class="faint xsmall"><span class="num">2</span>d</span></div>
+          <div class="row"><span class="l"><span class="tile t"><i class="ti ti-coins"></i></span> <span><span style="font-weight:600;" data-i18n="n5"></span><br><span class="faint xsmall" data-i18n="n5s"></span></span></span><span class="faint xsmall"><span class="num">3</span>d</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- S1 ZAKAT TRACKER -->
+    <section class="screen" id="s-zakat">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="hdr"><button class="iconbtn" data-back><i class="ti ti-chevron-left flip"></i></button><div class="title" data-i18n="zakatTracker"></div><button class="iconbtn"><i class="ti ti-info-circle"></i></button></div>
+      <div class="body">
+        <div class="hero" style="text-align:center; padding-top:24px;">
+          <svg class="orn" viewBox="0 0 200 200"><g fill="none" stroke="#fff" stroke-width="1.2"><circle cx="100" cy="100" r="94"/><circle cx="100" cy="100" r="60"/><path d="M100 6 L194 100 L100 194 L6 100 Z"/><path d="M34 34 L166 34 L166 166 L34 166 Z"/></g></svg>
+          <div class="kicker" data-i18n="estThisYear"></div>
+          <div style="position:relative; width:172px; height:172px; margin:14px auto 8px;">
+            <svg width="172" height="172" viewBox="0 0 172 172"><circle cx="86" cy="86" r="74" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="7"/><circle cx="86" cy="86" r="74" fill="none" stroke="#C7A867" stroke-width="7" stroke-linecap="round" stroke-dasharray="428 465" transform="rotate(-90 86 86)"/></svg>
+            <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;"><div class="display" style="font-size:34px;"><span class="num">3,450</span></div><div style="font-size:12px; color:rgba(199,168,103,.95); letter-spacing:.08em; margin-top:2px;" data-i18n="aed"></div></div>
+          </div>
+          <div style="font-size:14px; color:#fff; font-weight:600;" data-i18n="hijri"></div>
+          <div style="font-size:12px; color:rgba(255,255,255,.62); margin-top:3px;"><span data-i18n="completesIn"></span></div>
+        </div>
+
+        <div style="display:flex; gap:12px; margin-top:16px;">
+          <div class="statcard"><div class="kicker" style="font-size:10px;" data-i18n="aboveBy"></div><div class="display" style="font-size:18px; margin-top:6px;"><span class="num">1,070</span> <span style="font-family:var(--sans); font-size:11px; font-weight:500;" data-i18n="aed"></span></div></div>
+          <div class="statcard"><div class="kicker" style="font-size:10px;" data-i18n="monthsAbove"></div><div class="display" style="font-size:18px; margin-top:6px; color:var(--pine-soft);"><span class="num">11</span>/<span class="num">12</span></div></div>
+        </div>
+
+        <div class="sechead"><span class="kicker" data-i18n="yourZakatYear"></span></div>
+        <div class="card">
+          <div class="tl">
+            <div class="tl-step done"><span class="tl-dot"></span><div class="tl-lbl" data-i18n="tlNisab"></div><div class="tl-sub" data-i18n="tlNisabSub"></div></div>
+            <div class="tl-step active"><span class="tl-dot"></span><div class="tl-lbl" data-i18n="tlHawl"></div><div class="tl-sub" data-i18n="tlHawlSub"></div></div>
+            <div class="tl-step"><span class="tl-dot"></span><div class="tl-lbl" data-i18n="tlDue"></div><div class="tl-sub" data-i18n="tlDueSub"></div></div>
+          </div>
+          <div class="note" style="margin-top:16px;"><i class="ti ti-refresh"></i> <span data-i18n="tracked"></span></div>
+        </div>
+      </div>
+      <div class="cta-wrap"><button class="btn primary" onclick="go('s-assets')"><span data-i18n="reviewAssets"></span> <i class="ti ti-arrow-left flip"></i></button></div>
+    </section>
+
+    <!-- S2 ASSETS -->
+    <section class="screen" id="s-assets">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="hdr"><button class="iconbtn" data-back><i class="ti ti-chevron-left flip"></i></button><div class="title" data-i18n="yourAssets"></div><span style="width:40px;"></span></div>
+      <div class="body">
+        <div class="card">
+          <div class="kicker" data-i18n="zakatableTotal"></div>
+          <div class="display" style="font-size:30px; margin-top:6px;"><span class="num">138,000</span> <span style="font-family:var(--sans); font-size:15px; font-weight:500; color:var(--muted);" data-i18n="aed"></span></div>
+          <div class="alloc"><span style="width:56.5%; background:var(--pine);"></span><span style="width:30.8%; background:var(--brass);"></span><span style="width:12.7%; background:var(--pine-soft);"></span></div>
+          <div class="legend"><span><i style="background:var(--pine);"></i><span data-i18n="cash"></span></span><span><i style="background:var(--brass);"></i><span data-i18n="amanahGold"></span></span><span><i style="background:var(--pine-soft);"></i><span data-i18n="sukuk"></span></span></div>
+        </div>
+        <div class="list" style="margin-top:14px;">
+          <div class="row"><span class="l"><span class="tile"><i class="ti ti-cash"></i></span> <span data-i18n="cash"></span></span><span class="v"><span class="num">78,000</span></span></div>
+          <div class="row"><span class="l"><span class="tile brass"><i class="ti ti-coins"></i></span> <span><span data-i18n="amanahGold"></span><br><span class="faint xsmall"><i class="ti ti-point-filled" style="font-size:8px; color:var(--pine-soft);"></i> <span data-i18n="livePrice"></span></span></span></span><span class="v"><span class="num">42,500</span></span></div>
+          <div class="row"><span class="l"><span class="tile"><i class="ti ti-chart-line"></i></span> <span data-i18n="sukuk"></span></span><span class="v"><span class="num">18,000</span></span></div>
+          <div class="row"><span class="l muted"><span class="tile neutral"><i class="ti ti-minus"></i></span> <span data-i18n="lessDebts"></span></span><span class="v muted">−<span class="num">500</span></span></div>
+        </div>
+        <button class="btn ghost sm" style="margin-top:14px;"><i class="ti ti-plus"></i> <span data-i18n="addAsset"></span></button>
+      </div>
+      <div class="cta-wrap"><button class="btn primary" onclick="go('s-nisab')"><span data-i18n="continue"></span> <i class="ti ti-arrow-left flip"></i></button></div>
+    </section>
+
+    <!-- S3 NISAB -->
+    <section class="screen" id="s-nisab">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="hdr"><button class="iconbtn" data-back><i class="ti ti-chevron-left flip"></i></button><div class="title" data-i18n="nisabBasis"></div><span style="width:40px;"></span></div>
+      <div class="body">
+        <p style="font-size:15px; color:var(--ink-soft); line-height:1.6; margin-top:0;" data-i18n="nisabIntro"></p>
+        <div class="opt sel" data-basis onclick="selOpt(this)">
+          <span class="av" style="background:linear-gradient(135deg,#A7AEA6,#7C857E);"><i class="ti ti-coin"></i></span>
+          <div style="flex:1;"><div style="font-weight:600;"><span data-i18n="silver"></span> <span class="badge" data-i18n="recommended"></span></div><div class="muted small" style="margin-top:3px;"><span data-i18n="thresholdNow"></span> <b style="color:var(--ink);"><span class="num">2,380</span> <span data-i18n="aed"></span></b></div></div>
+          <div class="check"><i class="ti ti-check"></i></div>
+        </div>
+        <div class="opt" data-basis onclick="selOpt(this)">
+          <span class="av" style="background:linear-gradient(135deg,#C7A867,#9C7A3C);"><i class="ti ti-coins"></i></span>
+          <div style="flex:1;"><div style="font-weight:600;" data-i18n="goldBasis"></div><div class="muted small" style="margin-top:3px;"><span data-i18n="thresholdNow"></span> <b style="color:var(--ink);"><span class="num">26,900</span> <span data-i18n="aed"></span></b></div></div>
+          <div class="check"><i class="ti ti-check"></i></div>
+        </div>
+        <div class="note"><i class="ti ti-book"></i> <span data-i18n="nisabNote"></span></div>
+      </div>
+      <div class="cta-wrap"><button class="btn primary" onclick="go('s-result')"><span data-i18n="continue"></span> <i class="ti ti-arrow-left flip"></i></button></div>
+    </section>
+
+    <!-- S4 RESULT -->
+    <section class="screen" id="s-result">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="hdr"><button class="iconbtn" data-back><i class="ti ti-chevron-left flip"></i></button><div class="title" data-i18n="yourZakat"></div><span style="width:40px;"></span></div>
+      <div class="body">
+        <div style="text-align:center;">
+          <div class="kicker" data-i18n="zakatDue"></div>
+          <div class="donutwrap">
+            <svg width="164" height="164" viewBox="0 0 164 164">
+              <circle cx="82" cy="82" r="62" fill="none" stroke="var(--surface-2)" stroke-width="16"/>
+              <circle cx="82" cy="82" r="62" fill="none" stroke="#0F3D2E" stroke-width="16" stroke-dasharray="220 170" stroke-dashoffset="0" transform="rotate(-90 82 82)"/>
+              <circle cx="82" cy="82" r="62" fill="none" stroke="#9C7A3C" stroke-width="16" stroke-dasharray="119 271" stroke-dashoffset="-220" transform="rotate(-90 82 82)"/>
+              <circle cx="82" cy="82" r="62" fill="none" stroke="#1C5A45" stroke-width="16" stroke-dasharray="51 339" stroke-dashoffset="-339" transform="rotate(-90 82 82)"/>
+            </svg>
+            <div class="dt"><b class="num">3,450</b><span data-i18n="aed"></span></div>
+          </div>
+          <div class="faint small"><span class="num">2.5</span>% × <span class="num">138,000</span> <span data-i18n="aed"></span></div>
+        </div>
+        <div class="list" style="margin-top:16px;">
+          <div class="row"><span class="l"><i style="width:9px;height:9px;border-radius:2px;background:var(--pine);display:inline-block;"></i> <span data-i18n="cash"></span></span><span class="v"><span class="num">1,950</span></span></div>
+          <div class="row"><span class="l"><i style="width:9px;height:9px;border-radius:2px;background:var(--brass);display:inline-block;"></i> <span data-i18n="amanahGold"></span></span><span class="v"><span class="num">1,050</span></span></div>
+          <div class="row"><span class="l"><i style="width:9px;height:9px;border-radius:2px;background:var(--pine-soft);display:inline-block;"></i> <span data-i18n="sukuk"></span></span><span class="v"><span class="num">450</span></span></div>
+        </div>
+        <div class="note"><i class="ti ti-shield-check"></i> <span><span data-i18n="basisSilver"></span> · <span data-i18n="priceUpdated"></span></span></div>
+      </div>
+      <div class="cta-wrap"><button class="btn primary" onclick="go('s-recip')"><span data-i18n="chooseRecipients"></span> <i class="ti ti-arrow-left flip"></i></button></div>
+    </section>
+
+    <!-- S5 RECIPIENTS -->
+    <section class="screen" id="s-recip">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="hdr"><button class="iconbtn" data-back><i class="ti ti-chevron-left flip"></i></button><div class="title" data-i18n="chooseRecipients"></div><span style="width:40px;"></span></div>
+      <div class="body">
+        <div class="seg" style="margin-bottom:16px;"><button class="on" data-rmode="charity" onclick="recipMode('charity')" data-i18n="byCharity"></button><button data-rmode="cat" onclick="recipMode('cat')" data-i18n="byCategory"></button></div>
+        <div id="recip-charity">
+          <p style="font-size:14px; color:var(--muted); margin-top:0;" data-i18n="selectCauses"></p>
+          <div class="opt sel" onclick="selMulti(this)"><span class="av" style="background:linear-gradient(135deg,#C0504C,#9A3835);"><i class="ti ti-heart-handshake"></i></span><div style="flex:1;"><div style="font-weight:600;"><span data-i18n="c1"></span> <span class="badge"><i class="ti ti-rosette-discount-check"></i> <span data-i18n="verified"></span></span></div><div class="muted small" style="margin-top:3px;" data-i18n="c1d"></div></div><div class="check"><i class="ti ti-check"></i></div></div>
+          <div class="opt" onclick="selMulti(this)"><span class="av" style="background:linear-gradient(135deg,#1C5A45,#0F3D2E);"><i class="ti ti-home-heart"></i></span><div style="flex:1;"><div style="font-weight:600;"><span data-i18n="c2"></span> <span class="badge"><i class="ti ti-rosette-discount-check"></i> <span data-i18n="verified"></span></span></div><div class="muted small" style="margin-top:3px;" data-i18n="c2d"></div></div><div class="check"><i class="ti ti-check"></i></div></div>
+          <div class="opt" onclick="selMulti(this)"><span class="av" style="background:linear-gradient(135deg,#C7A867,#9C7A3C);"><i class="ti ti-school"></i></span><div style="flex:1;"><div style="font-weight:600;"><span data-i18n="c3"></span> <span class="badge"><i class="ti ti-rosette-discount-check"></i> <span data-i18n="verified"></span></span></div><div class="muted small" style="margin-top:3px;" data-i18n="c3d"></div></div><div class="check"><i class="ti ti-check"></i></div></div>
+        </div>
+        <div id="recip-cat" style="display:none;">
+          <p style="font-size:14px; color:var(--muted); margin-top:0; line-height:1.55;" data-i18n="asnafIntro"></p>
+          <div class="list">
+            <div class="row"><span class="l"><i class="ti ti-circle-check" style="color:var(--pine-soft); font-size:20px;"></i> <span data-i18n="asnaf1"></span></span><span class="faint xsmall num">12.5%</span></div>
+            <div class="row"><span class="l"><i class="ti ti-circle-check" style="color:var(--pine-soft); font-size:20px;"></i> <span data-i18n="asnaf2"></span></span><span class="faint xsmall num">12.5%</span></div>
+            <div class="row"><span class="l"><i class="ti ti-circle-check" style="color:var(--pine-soft); font-size:20px;"></i> <span data-i18n="asnaf3"></span></span><span class="faint xsmall num">12.5%</span></div>
+            <div class="row"><span class="l"><i class="ti ti-circle-check" style="color:var(--pine-soft); font-size:20px;"></i> <span data-i18n="asnaf4"></span></span><span class="faint xsmall num">12.5%</span></div>
+            <div class="row"><span class="l"><i class="ti ti-circle-check" style="color:var(--pine-soft); font-size:20px;"></i> <span data-i18n="asnaf5"></span></span><span class="faint xsmall num">12.5%</span></div>
+            <div class="row"><span class="l"><i class="ti ti-circle-check" style="color:var(--pine-soft); font-size:20px;"></i> <span data-i18n="asnaf6"></span></span><span class="faint xsmall num">12.5%</span></div>
+            <div class="row"><span class="l"><i class="ti ti-circle-check" style="color:var(--pine-soft); font-size:20px;"></i> <span data-i18n="asnaf7"></span></span><span class="faint xsmall num">12.5%</span></div>
+            <div class="row"><span class="l"><i class="ti ti-circle-check" style="color:var(--pine-soft); font-size:20px;"></i> <span data-i18n="asnaf8"></span></span><span class="faint xsmall num">12.5%</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="cta-wrap"><button class="btn primary" onclick="go('s-review')"><span data-i18n="reviewPay"></span> <i class="ti ti-arrow-left flip"></i></button></div>
+    </section>
+
+    <!-- S6 REVIEW -->
+    <section class="screen" id="s-review">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="hdr"><button class="iconbtn" data-back><i class="ti ti-chevron-left flip"></i></button><div class="title" data-i18n="review"></div><span style="width:40px;"></span></div>
+      <div class="body">
+        <div style="text-align:center; padding:8px 0 16px;"><div class="kicker" data-i18n="amount"></div><div class="display" style="font-size:36px; color:var(--pine); margin-top:6px;"><span class="num">3,450</span> <span style="font-family:var(--sans); font-size:17px; font-weight:500;" data-i18n="aed"></span></div></div>
+        <div class="list">
+          <div class="row"><span class="muted l" data-i18n="from"></span><span style="font-weight:600;" data-i18n="mainAccount"></span></div>
+          <div class="row"><span class="muted l" data-i18n="method"></span><span style="font-weight:600;">Aani</span></div>
+          <div class="row"><span class="muted l" data-i18n="recipientsL"></span><span style="font-weight:600;"><span class="num">3</span> <span data-i18n="causes"></span></span></div>
+          <div class="row"><span class="muted l" data-i18n="fee"></span><span style="color:var(--pine-soft); font-weight:600;"><span class="num">0</span> <span data-i18n="aed"></span></span></div>
+        </div>
+        <div class="note"><i class="ti ti-shield-check"></i> <span data-i18n="feeFree"></span></div>
+      </div>
+      <div class="cta-wrap"><button class="btn primary" onclick="go('s-done')"><i class="ti ti-face-id"></i> <span data-i18n="confirmFace"></span></button></div>
+    </section>
+
+    <!-- S7 CONFIRMATION -->
+    <section class="screen" id="s-done">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="body" style="text-align:center; display:flex; flex-direction:column;">
+        <div class="succ">
+          <svg class="ros" viewBox="0 0 142 142"><g fill="none" stroke="#9C7A3C" stroke-width="1.2"><circle cx="71" cy="71" r="66"/><circle cx="71" cy="71" r="49"/><path d="M71 5 L137 71 L71 137 L5 71 Z"/><path d="M25 25 L117 25 L117 117 L25 117 Z"/><path d="M71 5 L71 137 M5 71 L137 71 M25 25 L117 117 M117 25 L25 117"/></g></svg>
+          <div class="chk"><i class="ti ti-check"></i></div>
+        </div>
+        <div class="display" style="font-size:24px; margin-top:24px;" data-i18n="thankYou"></div>
+        <div style="font-size:17px; color:var(--brass-2); margin-top:8px;" data-i18n="mayAccept"></div>
+        <div class="list" style="margin-top:26px; text-align:start;">
+          <div class="row"><span class="muted l" data-i18n="amount"></span><b><span class="num">3,450</span> <span data-i18n="aed"></span></b></div>
+          <div class="row"><span class="muted l" data-i18n="reference"></span><span style="font-weight:600;" class="num">ZK-48213</span></div>
+          <div class="row" onclick="go('s-impact')" style="cursor:pointer;"><span class="l" style="gap:9px; color:var(--pine-soft); font-weight:600;"><i class="ti ti-circle-check"></i> <span data-i18n="addedImpact"></span></span><i class="ti ti-chevron-right flip faint"></i></div>
+        </div>
+        <div style="display:flex; gap:12px; margin-top:16px;">
+          <button class="btn ghost sm" style="flex:1;"><i class="ti ti-download"></i> <span data-i18n="receipt"></span></button>
+          <button class="btn ghost sm" style="flex:1;"><i class="ti ti-bell"></i> <span data-i18n="setReminder"></span></button>
+        </div>
+      </div>
+      <div class="cta-wrap"><button class="btn primary" onclick="go('s-home')"><span data-i18n="done"></span></button></div>
+    </section>
+
+    <!-- GIVE HUB -->
+    <section class="screen" id="s-give">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="hdr"><span style="width:40px;"></span><div class="title" data-i18n="give"></div><span style="width:40px;"></span></div>
+      <div class="body">
+        <div class="hero" style="text-align:center;">
+          <svg class="orn" viewBox="0 0 200 200"><g fill="none" stroke="#fff" stroke-width="1.2"><circle cx="100" cy="100" r="94"/><circle cx="100" cy="100" r="60"/><path d="M100 6 L194 100 L100 194 L6 100 Z"/></g></svg>
+          <div class="kicker" data-i18n="givenThisHawl"></div>
+          <div class="bal display" style="justify-content:center; display:flex; align-items:baseline; gap:4px;"><span class="num">312</span><span class="cur" data-i18n="aed"></span></div>
+          <div class="sub" style="justify-content:center;"><i class="ti ti-heart" style="color:var(--brass-soft);"></i> <span data-i18n="giveSub"></span></div>
+        </div>
+        <div style="margin-top:18px;">
+          <button class="bigopt" onclick="go('s-zakat')"><span class="av" style="background:linear-gradient(135deg,#1C5A45,#0F3D2E);"><i class="ti ti-heart-handshake"></i></span><div style="flex:1;"><div class="bt" data-i18n="zakat"></div><div class="bn" data-i18n="zakatCardSub"></div></div><i class="ti ti-chevron-right flip faint"></i></button>
+          <button class="bigopt" onclick="go('s-sadaqah')"><span class="av" style="background:linear-gradient(135deg,#C7A867,#9C7A3C);"><i class="ti ti-coins"></i></span><div style="flex:1;"><div class="bt"><span data-i18n="sadaqah"></span> <span class="badge"><span style="width:5px;height:5px;border-radius:50%;background:var(--pine-soft);display:inline-block;"></span> ON</span></div><div class="bn" data-i18n="sadaqahSub"></div></div><i class="ti ti-chevron-right flip faint"></i></button>
+          <button class="bigopt" style="opacity:.55;" onclick="alert('Waqf — coming soon')"><span class="av" style="background:linear-gradient(135deg,#A7AEA6,#7C857E);"><i class="ti ti-building-bank"></i></span><div style="flex:1;"><div class="bt"><span data-i18n="waqf"></span> <span class="badge brass" data-i18n="comingSoon"></span></div><div class="bn" data-i18n="waqfSub"></div></div></button>
+          <button class="bigopt" onclick="go('s-impact')"><span class="av" style="background:linear-gradient(135deg,#1C5A45,#0F3D2E);"><i class="ti ti-chart-arcs"></i></span><div style="flex:1;"><div class="bt" data-i18n="yourImpact"></div><div class="bn" data-i18n="viewImpact"></div></div><i class="ti ti-chevron-right flip faint"></i></button>
+        </div>
+      </div>
+      <nav class="nav" data-nav></nav>
+    </section>
+
+    <!-- GOLD -->
+    <section class="screen" id="s-gold">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="hdr"><button class="iconbtn" data-back><i class="ti ti-chevron-left flip"></i></button><div class="title" data-i18n="goldTitle"></div><span style="width:40px;"></span></div>
+      <div class="body">
+        <div class="hero" style="background:radial-gradient(120% 140% at 85% 0%, #C7A867 0%, #9C7A3C 50%, #7E6230 100%); box-shadow:0 18px 40px rgba(156,122,60,.28);">
+          <svg class="orn" viewBox="0 0 200 200"><g fill="none" stroke="#fff" stroke-width="1.2"><circle cx="100" cy="100" r="94"/><circle cx="100" cy="100" r="60"/><path d="M100 6 L194 100 L100 194 L6 100 Z"/></g></svg>
+          <div class="kicker" style="color:rgba(255,255,255,.85);" data-i18n="yourGold"></div>
+          <div class="bal display"><span class="num">12.4</span><span class="cur" data-i18n="grams"></span></div>
+          <div class="sub">≈ <b><span class="num">42,500</span> <span data-i18n="aed"></span></b> · <i class="ti ti-trending-up"></i> +<span class="num">3.2</span>% <span data-i18n="monthUp"></span></div>
+        </div>
+        <div class="card" style="margin-top:14px;">
+          <div style="display:flex; align-items:center; justify-content:space-between;"><span class="muted small"><i class="ti ti-point-filled" style="font-size:9px; color:var(--pine-soft);"></i> <span data-i18n="livePriceLabel"></span></span><span class="display" style="font-size:17px;"><span class="num">285.40</span> <span style="font-family:var(--sans); font-size:11px; font-weight:500; color:var(--muted);"><span data-i18n="aed"></span><span data-i18n="perGram"></span></span></span></div>
+          <svg class="spark" viewBox="0 0 300 44" preserveAspectRatio="none"><polyline points="0,33 38,29 76,32 114,22 152,26 190,16 228,20 266,10 300,6" fill="none" stroke="#9C7A3C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="card" style="margin-top:12px; display:flex; align-items:center; gap:13px;">
+          <span class="tile"><i class="ti ti-repeat"></i></span>
+          <div style="flex:1;"><div style="font-weight:600; font-size:14.5px;" data-i18n="autoGold"></div><div class="muted xsmall" style="margin-top:2px;" data-i18n="autoGoldSub"></div></div>
+          <div class="switch" onclick="toggleSwitch(this)"><span class="knob"></span></div>
+        </div>
+        <div class="sechead"><span class="kicker" data-i18n="amountToBuy"></span></div>
+        <div style="display:flex; gap:10px;">
+          <button class="chip" onclick="selChip(this)">100</button>
+          <button class="chip on" onclick="selChip(this)">500</button>
+          <button class="chip" onclick="selChip(this)">1,000</button>
+          <button class="chip" onclick="selChip(this)" style="font-family:var(--sans); font-size:14px; font-weight:600;" data-i18n="custom"></button>
+        </div>
+        <div class="note"><i class="ti ti-shield-check"></i> <span data-i18n="goldNote"></span></div>
+      </div>
+      <div class="cta-wrap"><button class="btn primary" onclick="go('s-golddone')"><span data-i18n="buyGold"></span> <i class="ti ti-arrow-left flip"></i></button></div>
+      <nav class="nav" data-nav></nav>
+    </section>
+
+    <!-- GOLD SUCCESS -->
+    <section class="screen" id="s-golddone">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="body" style="text-align:center; display:flex; flex-direction:column;">
+        <div class="chk" style="margin:40px auto 0;"><i class="ti ti-check"></i></div>
+        <div class="display" style="font-size:23px; margin-top:22px;" data-i18n="goldBought"></div>
+        <div style="font-size:16px; color:var(--brass-2); font-weight:600; margin-top:8px;"><span class="num">500</span> <span data-i18n="aed"></span> · <span class="num">1.75</span> <span data-i18n="grams"></span></div>
+        <div class="note" style="justify-content:center; text-align:center; margin-top:18px;"><i class="ti ti-circle-check"></i> <span data-i18n="addedHoldings"></span></div>
+      </div>
+      <div class="cta-wrap"><button class="btn primary" onclick="go('s-gold')"><span data-i18n="done"></span></button></div>
+    </section>
+
+    <!-- SADAQAH -->
+    <section class="screen" id="s-sadaqah">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="hdr"><button class="iconbtn" data-back><i class="ti ti-chevron-left flip"></i></button><div class="title" data-i18n="sadaqahTitle"></div><span style="width:40px;"></span></div>
+      <div class="body">
+        <div class="card" style="display:flex; align-items:center; gap:14px;">
+          <span class="tile brass"><i class="ti ti-arrow-up-circle"></i></span>
+          <div style="flex:1; font-weight:500; font-size:14px; line-height:1.45;" data-i18n="roundUpToggle"></div>
+          <div class="switch on" onclick="toggleSwitch(this)"><span class="knob"></span></div>
+        </div>
+        <div style="display:flex; gap:12px; margin-top:14px;">
+          <div class="statcard"><div class="kicker" style="font-size:10px;" data-i18n="thisMonth"></div><div class="display" style="font-size:19px; margin-top:5px;"><span class="num">47.30</span> <span style="font-family:var(--sans); font-size:11px; font-weight:500;" data-i18n="aed"></span></div><div class="faint xsmall" style="margin-top:1px;" data-i18n="roundedUp"></div></div>
+          <div class="statcard"><div class="kicker" style="font-size:10px;" data-i18n="givenYear"></div><div class="display" style="font-size:19px; margin-top:5px; color:var(--pine-soft);"><span class="num">312</span> <span style="font-family:var(--sans); font-size:11px; font-weight:500;" data-i18n="aed"></span></div></div>
+        </div>
+        <div class="card" style="margin-top:14px; display:flex; align-items:center; gap:13px;">
+          <span class="av" style="background:linear-gradient(135deg,#1C5A45,#0F3D2E); width:42px; height:42px;"><i class="ti ti-home-heart"></i></span>
+          <div style="flex:1;"><div class="kicker" style="font-size:10px;" data-i18n="yourCause"></div><div style="font-weight:600; font-size:14.5px; margin-top:3px;" data-i18n="c2"></div></div>
+          <button class="iconbtn" style="width:auto; padding:8px 14px; border-radius:11px; font-size:13px; font-weight:600; color:var(--pine-soft);" onclick="go('s-recip')" data-i18n="change"></button>
+        </div>
+        <div class="sechead"><span class="kicker" data-i18n="recent"></span></div>
+        <div class="list">
+          <div class="row"><span class="l"><span class="tile neutral"><i class="ti ti-coffee"></i></span> <span><span data-i18n="tx1"></span><br><span class="faint xsmall"><span class="num">18.50</span> <span data-i18n="aed"></span></span></span></span><span class="v" style="color:var(--brass-2);">+<span class="num">0.50</span></span></div>
+          <div class="row"><span class="l"><span class="tile neutral"><i class="ti ti-shopping-cart"></i></span> <span><span data-i18n="tx2"></span><br><span class="faint xsmall"><span class="num">132.10</span> <span data-i18n="aed"></span></span></span></span><span class="v" style="color:var(--brass-2);">+<span class="num">0.90</span></span></div>
+          <div class="row"><span class="l"><span class="tile neutral"><i class="ti ti-gas-station"></i></span> <span><span data-i18n="tx3"></span><br><span class="faint xsmall"><span class="num">94.30</span> <span data-i18n="aed"></span></span></span></span><span class="v" style="color:var(--brass-2);">+<span class="num">0.70</span></span></div>
+        </div>
+      </div>
+      <div class="cta-wrap"><button class="btn primary" onclick="go('s-give')"><span data-i18n="save"></span></button></div>
+    </section>
+
+    <!-- PROFIT TRANSPARENCY -->
+    <section class="screen" id="s-profit">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="hdr"><button class="iconbtn" data-back><i class="ti ti-chevron-left flip"></i></button><div class="title" data-i18n="profitTitle"></div><span style="width:40px;"></span></div>
+      <div class="body">
+        <div class="hero">
+          <svg class="orn" viewBox="0 0 200 200"><g fill="none" stroke="#fff" stroke-width="1.2"><circle cx="100" cy="100" r="94"/><circle cx="100" cy="100" r="60"/><path d="M100 6 L194 100 L100 194 L6 100 Z"/><path d="M34 34 L166 34 L166 166 L34 166 Z"/></g></svg>
+          <div class="kicker" data-i18n="profitNoInterest"></div>
+          <div class="bal display">+<span class="num" data-count="2150">2,150</span><span class="cur" data-i18n="aed"></span></div>
+          <div class="sub"><i class="ti ti-shield-check" style="color:var(--brass-soft);"></i> <span data-i18n="expProfitVal"></span></div>
+        </div>
+        <div class="card" style="margin-top:16px;">
+          <div style="font-weight:600; font-size:15.5px;" data-i18n="mudarabaTitle"></div>
+          <p class="muted small" style="line-height:1.65; margin:8px 0 0;" data-i18n="mudarabaBody"></p>
+        </div>
+        <div class="card" style="margin-top:12px;">
+          <div class="kicker" data-i18n="shareRatio"></div>
+          <div style="display:flex; justify-content:space-between; margin-top:10px; font-weight:600; font-size:14px;"><span><span data-i18n="you"></span> <span class="num">70%</span></span><span class="muted"><span data-i18n="bank"></span> <span class="num">30%</span></span></div>
+          <div class="alloc" style="margin-top:10px;"><span style="width:70%; background:var(--pine);"></span><span style="width:30%; background:var(--brass);"></span></div>
+        </div>
+        <div class="sechead"><span class="kicker" data-i18n="howItWorks"></span></div>
+        <div class="list">
+          <div class="row"><span class="l"><span class="numtile num">1</span> <span><span style="font-weight:600;" data-i18n="pst1"></span><br><span class="muted xsmall" data-i18n="pst1d"></span></span></span></div>
+          <div class="row"><span class="l"><span class="numtile num">2</span> <span><span style="font-weight:600;" data-i18n="pst2"></span><br><span class="muted xsmall" data-i18n="pst2d"></span></span></span></div>
+          <div class="row"><span class="l"><span class="numtile num">3</span> <span><span style="font-weight:600;" data-i18n="pst3"></span><br><span class="muted xsmall" data-i18n="pst3d"></span></span></span></div>
+        </div>
+        <div class="note"><i class="ti ti-rosette-discount-check"></i> <span data-i18n="certified"></span></div>
+      </div>
+      <div class="cta-wrap"><button class="btn primary" onclick="back()"><span data-i18n="done"></span></button></div>
+    </section>
+
+    <!-- IMPACT -->
+    <section class="screen" id="s-impact">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="hdr"><button class="iconbtn" data-back><i class="ti ti-chevron-left flip"></i></button><div class="title" data-i18n="impactTitle"></div><span style="width:40px;"></span></div>
+      <div class="body">
+        <div class="hero" style="text-align:center;">
+          <svg class="orn" viewBox="0 0 200 200"><g fill="none" stroke="#fff" stroke-width="1.2"><circle cx="100" cy="100" r="94"/><circle cx="100" cy="100" r="60"/><path d="M100 6 L194 100 L100 194 L6 100 Z"/></g></svg>
+          <div class="kicker" data-i18n="totalGiven"></div>
+          <div class="bal display" style="justify-content:center; display:flex; align-items:baseline; gap:5px;"><span class="num" data-count="9840">9,840</span><span class="cur" data-i18n="aed"></span></div>
+        </div>
+        <div style="display:flex; gap:12px; margin-top:16px;">
+          <div class="statcard"><div class="kicker" style="font-size:10px;" data-i18n="thisYearGiven"></div><div class="display" style="font-size:19px; margin-top:5px;"><span class="num">3,762</span> <span style="font-family:var(--sans); font-size:11px; font-weight:500;" data-i18n="aed"></span></div></div>
+          <div class="statcard"><div class="kicker" style="font-size:10px;" data-i18n="familiesHelped"></div><div class="display" style="font-size:19px; margin-top:5px; color:var(--pine-soft);"><span class="num">18</span></div></div>
+        </div>
+        <div class="sechead"><span class="kicker" data-i18n="historyHead"></span></div>
+        <div class="list">
+          <div class="row"><span class="l"><span class="tile"><i class="ti ti-heart-handshake"></i></span> <span><span style="font-weight:600;" data-i18n="h1"></span><br><span class="faint xsmall"><i class="ti ti-rosette-discount-check" style="color:var(--pine-soft);"></i> <span data-i18n="verifiedReceipt"></span></span></span></span><span class="v"><span class="num">3,450</span></span></div>
+          <div class="row"><span class="l"><span class="tile brass"><i class="ti ti-coins"></i></span> <span><span style="font-weight:600;" data-i18n="h2"></span><br><span class="faint xsmall"><i class="ti ti-rosette-discount-check" style="color:var(--pine-soft);"></i> <span data-i18n="verifiedReceipt"></span></span></span></span><span class="v"><span class="num">312</span></span></div>
+          <div class="row"><span class="l"><span class="tile brass"><i class="ti ti-gift"></i></span> <span><span style="font-weight:600;" data-i18n="h3"></span><br><span class="faint xsmall"><i class="ti ti-rosette-discount-check" style="color:var(--pine-soft);"></i> <span data-i18n="verifiedReceipt"></span></span></span></span><span class="v"><span class="num">1,200</span></span></div>
+          <div class="row"><span class="l"><span class="tile"><i class="ti ti-heart-handshake"></i></span> <span><span style="font-weight:600;" data-i18n="h4"></span><br><span class="faint xsmall"><i class="ti ti-rosette-discount-check" style="color:var(--pine-soft);"></i> <span data-i18n="verifiedReceipt"></span></span></span></span><span class="v"><span class="num">3,180</span></span></div>
+        </div>
+      </div>
+      <nav class="nav" data-nav></nav>
+    </section>
+
+    <!-- PAY / AANI: RECIPIENT -->
+    <section class="screen" id="s-pay">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="hdr"><button class="iconbtn" data-back><i class="ti ti-chevron-left flip"></i></button><div class="title" data-i18n="payTitle"></div><span style="width:40px;"></span></div>
+      <div class="body">
+        <div class="muted small" style="display:flex; align-items:center; gap:6px;"><i class="ti ti-bolt" style="color:var(--brass);"></i> <span data-i18n="payVia"></span></div>
+        <div class="card" style="display:flex; align-items:center; gap:11px; margin-top:14px; color:var(--muted);"><i class="ti ti-phone"></i> <span data-i18n="toMobile"></span></div>
+        <div class="sechead"><span class="kicker" data-i18n="recentR"></span></div>
+        <div class="list">
+          <div class="row" style="cursor:pointer;" onclick="go('s-payamt')"><span class="l"><span class="av" style="background:linear-gradient(135deg,#1C5A45,#0F3D2E); width:42px; height:42px;"><i class="ti ti-user"></i></span> <span><span style="font-weight:600;" data-i18n="r1"></span><br><span class="faint xsmall">+971 50 ••• 4412</span></span></span><i class="ti ti-chevron-right flip faint"></i></div>
+          <div class="row" style="cursor:pointer;" onclick="go('s-payamt')"><span class="l"><span class="av" style="background:linear-gradient(135deg,#C7A867,#9C7A3C); width:42px; height:42px;"><i class="ti ti-user"></i></span> <span><span style="font-weight:600;" data-i18n="r2"></span><br><span class="faint xsmall">+971 55 ••• 8830</span></span></span><i class="ti ti-chevron-right flip faint"></i></div>
+          <div class="row" style="cursor:pointer;" onclick="go('s-payamt')"><span class="l"><span class="av" style="background:linear-gradient(135deg,#C0504C,#9A3835); width:42px; height:42px;"><i class="ti ti-heart"></i></span> <span><span style="font-weight:600;" data-i18n="r3"></span><br><span class="faint xsmall">+971 50 ••• 1207</span></span></span><i class="ti ti-chevron-right flip faint"></i></div>
+          <div class="row" style="cursor:pointer;" onclick="go('s-payamt')"><span class="l"><span class="av" style="background:linear-gradient(135deg,#5DCAA5,#1C5A45); width:42px; height:42px;"><i class="ti ti-user"></i></span> <span><span style="font-weight:600;" data-i18n="r4"></span><br><span class="faint xsmall">+971 56 ••• 5519</span></span></span><i class="ti ti-chevron-right flip faint"></i></div>
+        </div>
+        <button class="btn ghost sm" style="margin-top:14px;" onclick="go('s-payamt')"><i class="ti ti-plus"></i> <span data-i18n="newRecipient"></span></button>
+        <div class="note"><i class="ti ti-bolt"></i> <span data-i18n="payNote"></span></div>
+      </div>
+    </section>
+
+    <!-- PAY / AANI: AMOUNT -->
+    <section class="screen" id="s-payamt">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="hdr"><button class="iconbtn" data-back><i class="ti ti-chevron-left flip"></i></button><div class="title" data-i18n="payTitle"></div><span style="width:40px;"></span></div>
+      <div class="body">
+        <div class="card" style="display:flex; align-items:center; gap:11px;"><span class="av" style="background:linear-gradient(135deg,#1C5A45,#0F3D2E); width:40px; height:40px;"><i class="ti ti-user"></i></span><div style="flex:1;"><div style="font-weight:600;" data-i18n="r1"></div><div class="faint xsmall">+971 50 ••• 4412</div></div><span class="status"><span class="d"></span><span data-i18n="instant"></span></span></div>
+        <div style="text-align:center; padding:26px 0 12px;">
+          <div class="kicker" data-i18n="amount"></div>
+          <div class="display" style="font-size:42px; margin-top:8px;"><span class="num payval">500</span> <span style="font-family:var(--sans); font-size:18px; font-weight:500; color:var(--muted);" data-i18n="aed"></span></div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="chip" data-v="100" onclick="payAmt(this)">100</button>
+          <button class="chip on" data-v="500" onclick="payAmt(this)">500</button>
+          <button class="chip" data-v="1,000" onclick="payAmt(this)">1,000</button>
+          <button class="chip" data-v="2,000" onclick="payAmt(this)">2,000</button>
+        </div>
+        <div class="card" style="display:flex; align-items:center; gap:11px; margin-top:14px; color:var(--muted);"><i class="ti ti-pencil"></i> <span data-i18n="addNote"></span></div>
+      </div>
+      <div class="cta-wrap"><button class="btn primary" onclick="go('s-payrev')"><span data-i18n="continue"></span> <i class="ti ti-arrow-left flip"></i></button></div>
+    </section>
+
+    <!-- PAY / AANI: REVIEW -->
+    <section class="screen" id="s-payrev">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="hdr"><button class="iconbtn" data-back><i class="ti ti-chevron-left flip"></i></button><div class="title" data-i18n="review"></div><span style="width:40px;"></span></div>
+      <div class="body">
+        <div style="text-align:center; padding:6px 0 14px;"><div class="kicker" data-i18n="amount"></div><div class="display" style="font-size:36px; color:var(--pine); margin-top:6px;"><span class="num payval">500</span> <span style="font-size:17px;" data-i18n="aed"></span></div></div>
+        <div class="list">
+          <div class="row"><span class="muted l" data-i18n="toL"></span><span style="font-weight:600;" data-i18n="r1"></span></div>
+          <div class="row"><span class="muted l" data-i18n="from"></span><span style="font-weight:600;" data-i18n="mainAccount"></span></div>
+          <div class="row"><span class="muted l" data-i18n="method"></span><span class="status"><span class="d"></span>Aani · <span data-i18n="instant"></span></span></div>
+          <div class="row"><span class="muted l" data-i18n="fee"></span><span style="color:var(--pine-soft); font-weight:600;"><span class="num">0</span> <span data-i18n="aed"></span></span></div>
+        </div>
+        <div class="note"><i class="ti ti-bolt"></i> <span data-i18n="payNote"></span></div>
+      </div>
+      <div class="cta-wrap"><button class="btn primary" onclick="go('s-paydone')"><i class="ti ti-face-id"></i> <span data-i18n="confirmFace"></span></button></div>
+    </section>
+
+    <!-- PAY / AANI: SENT -->
+    <section class="screen" id="s-paydone">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="body" style="text-align:center; display:flex; flex-direction:column;">
+        <div class="chk" style="margin:36px auto 0;"><i class="ti ti-check"></i></div>
+        <div class="display" style="font-size:23px; margin-top:22px;" data-i18n="sentTitle"></div>
+        <div style="font-size:17px; color:var(--pine); font-weight:700; margin-top:8px;"><span class="num payval">500</span> <span data-i18n="aed"></span> · <span data-i18n="toL"></span> <span data-i18n="r1"></span></div>
+        <div class="muted small" style="margin-top:6px;" data-i18n="sentSub"></div>
+        <div class="list" style="margin-top:24px; text-align:start;">
+          <div class="row"><span class="muted l" data-i18n="reference"></span><span style="font-weight:600;" class="num">AN-77204</span></div>
+          <div class="row"><span class="muted l" data-i18n="method"></span><span class="status"><span class="d"></span>Aani · <span data-i18n="instant"></span></span></div>
+        </div>
+      </div>
+      <div class="cta-wrap"><button class="btn primary" onclick="go('s-home')"><span data-i18n="done"></span></button></div>
+    </section>
+
+    <!-- TRANSFER HELD / RECOVERY -->
+    <section class="screen" id="s-held">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="hdr"><button class="iconbtn" data-back><i class="ti ti-chevron-left flip"></i></button><div class="title" data-i18n="heldTitle"></div><span style="width:40px;"></span></div>
+      <div class="body" style="text-align:center; display:flex; flex-direction:column;">
+        <span style="width:72px; height:72px; border-radius:50%; background:#F7E7E2; color:#C0504C; display:flex; align-items:center; justify-content:center; font-size:34px; margin:22px auto 0;"><i class="ti ti-clock"></i></span>
+        <div class="display" style="font-size:22px; margin-top:18px;" data-i18n="heldH"></div>
+        <div style="font-size:16px; color:var(--pine); font-weight:700; margin-top:8px;"><span class="num payval">1,000</span> <span data-i18n="aed"></span> · <span data-i18n="toL"></span> <span data-i18n="r1"></span></div>
+        <div class="list" style="margin-top:22px; text-align:start; padding:4px 18px;">
+          <div class="row"><span class="muted l" data-i18n="statusL"></span><span style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:#9A3835; background:#F7E7E2; padding:4px 10px; border-radius:20px;"><span style="width:6px; height:6px; border-radius:50%; background:#C0504C;"></span><span data-i18n="onHold"></span></span></div>
+          <div class="row" style="display:block;"><div class="muted small" style="line-height:1.6;"><i class="ti ti-info-circle" style="color:var(--brass);"></i> <span data-i18n="heldWhy"></span></div></div>
+          <div class="row" style="display:block; border-bottom:none;"><div class="small" style="color:var(--pine-soft); font-weight:600; line-height:1.5;"><i class="ti ti-shield-check"></i> <span data-i18n="heldSafe"></span></div></div>
+        </div>
+        <button class="btn primary" style="margin-top:16px;" onclick="go('s-paydone')"><i class="ti ti-face-id"></i> <span data-i18n="verifyRelease"></span></button>
+        <button class="btn ghost sm" style="margin-top:10px;" onclick="go('s-home')"><span data-i18n="cancelRefund"></span></button>
+        <button class="iconbtn" style="width:auto; margin:14px auto 0; font-size:13px; color:var(--pine-soft); font-weight:600;"><i class="ti ti-headset"></i> <span data-i18n="talkHuman"></span></button>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="screen" id="s-settings">
+      <div class="statusbar"><span class="num">9:41</span><span class="dots"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+      <div class="hdr"><button class="iconbtn" data-back><i class="ti ti-chevron-left flip"></i></button><div class="title" data-i18n="settings"></div><span style="width:40px;"></span></div>
+      <div class="body">
+        <div class="sechead"><span class="kicker" data-i18n="preferences"></span></div>
+        <div class="list">
+          <div class="setrow"><span class="l"><span class="tile"><i class="ti ti-language"></i></span> <span data-i18n="language"></span></span><div class="seg"><button onclick="setLang('en')" data-seg-en data-i18n="english"></button><button onclick="setLang('ar')" data-seg-ar>العربية</button></div></div>
+          <div class="setrow"><span class="l"><span class="tile"><i class="ti ti-decimal"></i></span> <span data-i18n="numerals"></span></span><div class="seg"><button onclick="setNum('west')" data-seg-west>0-9</button><button onclick="setNum('east')" data-seg-east>٠-٩</button></div></div>
+          <div class="setrow"><span class="l"><span class="tile"><i class="ti ti-moon"></i></span> <span data-i18n="theme"></span></span><div class="seg"><button onclick="setTheme('light')" data-seg-light data-i18n="lightL"></button><button onclick="setTheme('dark')" data-seg-dark data-i18n="darkL"></button></div></div>
+        </div>
+        <div class="sechead"><span class="kicker" data-i18n="account"></span></div>
+        <div class="list">
+          <div class="setrow"><span class="l"><span class="tile"><i class="ti ti-face-id"></i></span> <span data-i18n="security"></span></span><i class="ti ti-chevron-right flip faint"></i></div>
+          <div class="setrow"><span class="l"><span class="tile"><i class="ti ti-help-circle"></i></span> <span data-i18n="support"></span></span><i class="ti ti-chevron-right flip faint"></i></div>
+        </div>
+      </div>
+      <nav class="nav" data-nav></nav>
+    </section>
+
+  </div>
+  <div class="homebar"></div>
+  </div>
+</div>
+<p style="font-size:12px; color:#6c685e; text-align:center; max-width:392px; line-height:1.5;" id="helper"></p>
+
+<script>
+const T = {
+  en:{
+    aed:"AED", avatar:"HM", greet:"Good evening,", greetName:"Hessa", availBalance:"Available balance", profitYear:"profit this year",
+    qSend:"Send", qGold:"Gold", qGive:"Give", qMore:"More", open:"Open",
+    navHome:"Home", navPay:"Pay", navGrow:"Grow", navGive:"Give", navProfile:"Profile",
+    zakatTracker:"Zakat tracker", zakat:"Zakat", zStatus:"On track", zHawlCompletes:"Hawl completes 14 Ramadan", estZakat:"Estimated Zakat", daysShort:"days", nisab11:"Above Nisab for 11 of 12 lunar months", reviewZakat:"Review Zakat",
+    estThisYear:"Estimated Zakat this year", hijri:"14 Ramadan 1447", completesIn:"completes in 24 days", aboveBy:"Above Nisab by", monthsAbove:"Months above", yourZakatYear:"Your Zakat year",
+    tlNisab:"Nisab crossed", tlNisabSub:"11 months ago", tlHawl:"Hawl year", tlHawlSub:"in progress", tlDue:"Zakat due", tlDueSub:"14 Ramadan", tracked:"Tracked continuously across all your assets — cash, gold and Sukuk.", reviewAssets:"Review my assets",
+    yourAssets:"Your assets", cash:"Cash", amanahGold:"Amânah Gold", livePrice:"live price", sukuk:"Sukuk & investments", lessDebts:"Less: debts due", addAsset:"Add asset", zakatableTotal:"Zakatable total", continue:"Continue",
+    nisabBasis:"Nisab basis", nisabIntro:"Nisab can be measured by gold or silver. Silver sets a lower threshold, so more is given.", nisabNote:"Most scholars recommend the silver basis. You can change this anytime.", silver:"Silver", goldBasis:"Gold", recommended:"Recommended", thresholdNow:"Threshold now",
+    yourZakat:"Your Zakat", zakatDue:"Zakat due this year", basisSilver:"Calculated on silver Nisab", priceUpdated:"gold price updated just now", chooseRecipients:"Choose recipients",
+    selectCauses:"Select where your Zakat goes — split across verified causes.", verified:"Verified", c1:"Emirates Red Crescent", c1d:"Food & shelter for families in need", c2:"Beit Al Khair Society", c2d:"Support for low-income residents", c3:"Dar Al Ber Society", c3d:"Education & orphan care",
+    reviewPay:"Review & pay", review:"Review", amount:"Amount", from:"From", mainAccount:"Main account", method:"Method", recipientsL:"Recipients", causes:"causes", fee:"Fee", feeFree:"AED 0 — Amânah never charges to give.", confirmFace:"Confirm with Face ID",
+    thankYou:"Your Zakat has been given", mayAccept:"تقبّل الله منك", reference:"Reference", addedImpact:"Added to your giving history", receipt:"Receipt", setReminder:"Remind me", done:"Done",
+    obTagline:"Banking that honours your values.", obP1:"Sharia-compliant by design", obP2:"Zakat & gold, built in", obP3:"Arabic-first, made for you", getStarted:"Get started",
+    openAccount:"Open your account", verifySeconds:"Verify your identity in seconds — no paperwork, no branch.", contUaePass:"Continue with UAE PASS", uaePassNote:"Fastest — for citizens & residents", useEid:"Use Emirates ID instead", eidNote:"Scan your ID + a quick selfie", govNote:"Government-grade verification by UAE PASS.",
+    requestAccess:"Amânah requests access to:", dName:"Full name", dEid:"Emirates ID number", dNat:"Nationality", dDob:"Date of birth", dAddr:"Verified address", consentNote:"Your verified details are shared securely. No selfie needed — UAE PASS has already verified you.", approve:"Approve with UAE PASS",
+    welcomeTitle:"Welcome to Amânah", accountReady:"Your Sharia-compliant account is ready.", accType:"Amânah Profit Account", enterApp:"Enter Amânah",
+    give:"Give", givenThisHawl:"Given this year", giveSub:"across 3 causes", zakatCardSub:"Due in 24 days · 3,450 AED", sadaqah:"Sadaqah", sadaqahSub:"Round up & give your spare change", waqf:"Waqf", waqfSub:"Endowment", comingSoon:"Soon",
+    goldTitle:"Amânah Gold", yourGold:"Your gold", grams:"g", monthUp:"this month", livePriceLabel:"24K gold · live", perGram:"/g", autoGold:"Monthly gold savings", autoGoldSub:"Auto-invest a fixed amount each month", buyGold:"Buy gold", amountToBuy:"Amount to buy", custom:"Other", goldNote:"Sharia-compliant & allocated (T+0). Counts toward your Zakat automatically.", goldBought:"Gold purchased", addedHoldings:"Added to your holdings · counts toward Zakat",
+    sadaqahTitle:"Sadaqah round-ups", roundUpToggle:"Round up every purchase to the nearest dirham", thisMonth:"This month", roundedUp:"rounded up", givenYear:"This year", yourCause:"Your cause", change:"Change", recent:"Recent round-ups", tx1:"Coffee", tx2:"Groceries", tx3:"Fuel", save:"Save changes",
+    settings:"Settings", preferences:"Preferences", language:"Language", english:"English", numerals:"Numerals", account:"Account", security:"Security & Face ID", support:"Help & support",
+    profitTitle:"How your profit works", profitNoInterest:"Profit, not interest", mudarabaTitle:"Mudarabah profit-sharing", mudarabaBody:"Amânah invests your deposits in Sharia-compliant assets and shares the profit with you by an agreed ratio — there is no fixed, guaranteed interest (riba).", shareRatio:"Profit-sharing ratio", expProfitVal:"Expected 3.9% p.a.", howItWorks:"How it works", pst1:"Your deposit is pooled", pst1d:"into a Sharia-compliant fund", pst2:"Amânah invests it", pst2d:"in Murabaha, Sukuk & ethical assets", pst3:"Profit is shared", pst3d:"credited monthly by the agreed ratio", certified:"Certified by Amânah's Sharia Supervisory Board", you:"You", bank:"Bank",
+    byCharity:"Charities", byCategory:"8 categories", asnafIntro:"Zakat may go to eight categories named in the Qur'an. Amânah distributes to verified causes within each.", asnaf1:"The poor (al-fuqarā')", asnaf2:"The needy (al-masākīn)", asnaf3:"Zakat workers (al-ʿāmilīn)", asnaf4:"Reconciliation of hearts", asnaf5:"Freeing captives (ar-riqāb)", asnaf6:"Those in debt (al-ghārimīn)", asnaf7:"In the cause of Allah", asnaf8:"The wayfarer (ibn as-sabīl)",
+    impactTitle:"Your impact", totalGiven:"Total given", thisYearGiven:"This year", familiesHelped:"Families helped", historyHead:"Giving history", verifiedReceipt:"Verified receipt", h1:"Zakat 1447", h2:"Sadaqah round-ups", h3:"Ramadan donation", h4:"Zakat 1446", yourImpact:"Your impact", viewImpact:"Giving history & receipts",
+    theme:"Theme", lightL:"Light", darkL:"Dark",
+    shariaUpdated:"Sharia-compliant · Updated now · •••• 6411", thisMonthSpent:"Spent this month", ofBudget:"of budget", recentActivity:"Recent activity", viewAll:"View all",
+    catGroceries:"Groceries", catDining:"Dining", catFuel:"Fuel", catToll:"Toll", catIncome:"Salary",
+    mSalary:"Abu Dhabi Govt", mCarrefour:"Carrefour", mTalabat:"Talabat", mAdnoc:"ADNOC", mSalik:"Salik", timeToday:"Today", timeYest:"Yesterday", roundupTag:"Sadaqah",
+    txnTitle:"Transaction", category:"Category", paidVia:"Paid via", amanahCard:"Amânah card •••• 6411", statusL:"Status", completed:"Completed", roundupLine:"Rounded up to Sadaqah", splitBill:"Split bill", getReceipt:"Get receipt", reportProblem:"Report a problem",
+    notifsTitle:"Notifications", markRead:"Mark all read", n1:"Salary credited", n1s:"+18,000 AED from Abu Dhabi Govt", n2:"Gold is up today", n2s:"+1.2% — holding now 42,500 AED", n3:"Zakat due soon", n3s:"Your Hawl completes in 24 days", n4:"Sadaqah round-ups", n4s:"You gave 12.40 AED this week", n5:"Profit shared", n5s:"+38.20 AED credited this month",
+    payTitle:"Send money", payVia:"via Aani · instant", toMobile:"To mobile number", recentR:"Recent", newRecipient:"New recipient", addNote:"Add a note (optional)", payNote:"Aani transfers are free and arrive in seconds.", instant:"Instant", toL:"To", sentTitle:"Money sent", sentSub:"Sent instantly via Aani", r1:"Khalid Al Mansoori", r2:"Aisha Al Suwaidi", r3:"Mother", r4:"Omar Abdullah",
+    heldTitle:"Transfer on hold", heldH:"We've paused this transfer", heldWhy:"This is your first transfer to this recipient, so we ran a quick security check.", heldSafe:"Your money is safe — it hasn't left your account.", onHold:"On hold", verifyRelease:"Verify & release", cancelRefund:"Cancel — funds stay with you", talkHuman:"Talk to a human · 24/7", heldNotif:"Transfer held — action needed", heldNotifSub:"AED 1,000 to Khalid is paused for a security check", stNow:"now", attentionHome:"1 transfer needs your attention",
+    helper:"Flow: Welcome → UAE PASS → Home. Switch language in Profile → Settings (or the globe). The whole app flips LTR ⇄ RTL."
+  },
+  ar:{
+    aed:"د.إ", avatar:"ح م", greet:"مساء الخير،", greetName:"حصة", availBalance:"الرصيد المتاح", profitYear:"أرباح هذا العام",
+    qSend:"إرسال", qGold:"الذهب", qGive:"العطاء", qMore:"المزيد", open:"فتح",
+    navHome:"الرئيسية", navPay:"الدفع", navGrow:"النمو", navGive:"العطاء", navProfile:"حسابي",
+    zakatTracker:"متتبّع الزكاة", zakat:"الزكاة", zStatus:"على المسار", zHawlCompletes:"يكتمل الحول 14 رمضان", estZakat:"الزكاة المقدّرة", daysShort:"يوم", nisab11:"فوق النِّصاب 11 من 12 شهرًا قمريًا", reviewZakat:"مراجعة الزكاة",
+    estThisYear:"الزكاة المقدّرة هذا العام", hijri:"14 رمضان 1447", completesIn:"يكتمل خلال 24 يومًا", aboveBy:"فوق النِّصاب بـ", monthsAbove:"أشهر فوقه", yourZakatYear:"عام زكاتك",
+    tlNisab:"تجاوز النِّصاب", tlNisabSub:"قبل 11 شهرًا", tlHawl:"عام الحول", tlHawlSub:"جارٍ", tlDue:"استحقاق الزكاة", tlDueSub:"14 رمضان", tracked:"تُحتسب تلقائيًا عبر جميع أصولك — النقد والذهب والصكوك.", reviewAssets:"مراجعة أموالي",
+    yourAssets:"أموالك", cash:"النقد", amanahGold:"ذهب أمانة", livePrice:"السعر الآن", sukuk:"صكوك واستثمارات", lessDebts:"ناقص: ديون مستحقّة", addAsset:"إضافة أصل", zakatableTotal:"الإجمالي الخاضع للزكاة", continue:"متابعة",
+    nisabBasis:"أساس النِّصاب", nisabIntro:"يُحسب النِّصاب بالذهب أو الفضّة. الفضّة تُعطي حدًّا أقل فتزداد الزكاة.", nisabNote:"يوصي أغلب العلماء بأساس الفضّة. يمكنك تغيير ذلك في أي وقت.", silver:"الفضّة", goldBasis:"الذهب", recommended:"موصى به", thresholdNow:"النِّصاب الآن",
+    yourZakat:"زكاتك", zakatDue:"الزكاة المستحقّة هذا العام", basisSilver:"حُسِبت على أساس نِصاب الفضّة", priceUpdated:"سعر الذهب مُحدَّث الآن", chooseRecipients:"اختيار الجهات المستفيدة",
+    selectCauses:"اختر أين تذهب زكاتك — وزّعها على جهات موثّقة.", verified:"موثّقة", c1:"الهلال الأحمر الإماراتي", c1d:"غذاء ومأوى للأسر المحتاجة", c2:"جمعية بيت الخير", c2d:"دعم محدودي الدخل", c3:"جمعية دار البر", c3d:"التعليم ورعاية الأيتام",
+    reviewPay:"المراجعة والدفع", review:"المراجعة", amount:"المبلغ", from:"من حساب", mainAccount:"الحساب الرئيسي", method:"طريقة التحويل", recipientsL:"الجهات", causes:"جهات", fee:"الرسوم", feeFree:"0 د.إ — أمانة لا تتقاضى رسومًا على العطاء.", confirmFace:"التأكيد ببصمة الوجه",
+    thankYou:"تم أداء زكاتك", mayAccept:"تقبّل الله منك", reference:"المرجع", addedImpact:"أُضيفت إلى سجلّ عطائك", receipt:"الإيصال", setReminder:"ذكّرني", done:"تم",
+    obTagline:"بنكٌ يحترم قيمك.", obP1:"متوافق مع الشريعة بالكامل", obP2:"الزكاة والذهب في صميمه", obP3:"بالعربية أولًا، صُمّم لك", getStarted:"لنبدأ",
+    openAccount:"افتح حسابك", verifySeconds:"تحقّق من هويتك في ثوانٍ — بلا أوراق ولا فروع.", contUaePass:"المتابعة عبر UAE PASS", uaePassNote:"الأسرع — للمواطنين والمقيمين", useEid:"استخدم الهوية الإماراتية", eidNote:"امسح هويتك مع صورة سريعة", govNote:"تحقّق حكومي المستوى عبر UAE PASS.",
+    requestAccess:"تطلب أمانة الوصول إلى:", dName:"الاسم الكامل", dEid:"رقم الهوية الإماراتية", dNat:"الجنسية", dDob:"تاريخ الميلاد", dAddr:"العنوان الموثّق", consentNote:"تُشارَك بياناتك الموثّقة بأمان. لا حاجة لصورة — فقد تحقّقت منك UAE PASS مسبقًا.", approve:"الموافقة عبر UAE PASS",
+    welcomeTitle:"أهلًا بك في أمانة", accountReady:"حسابك المتوافق مع الشريعة جاهز.", accType:"حساب أمانة بالأرباح", enterApp:"ادخل إلى أمانة",
+    give:"العطاء", givenThisHawl:"ما قدّمته هذا العام", giveSub:"عبر 3 جهات", zakatCardSub:"مستحقّة خلال 24 يومًا · 3,450 د.إ", sadaqah:"الصدقة", sadaqahSub:"تقريب المشتريات والتبرّع بالفكة", waqf:"الوقف", waqfSub:"وقف خيري", comingSoon:"قريبًا",
+    goldTitle:"ذهب أمانة", yourGold:"ذهبك", grams:"غ", monthUp:"هذا الشهر", livePriceLabel:"ذهب 24 قيراط · مباشر", perGram:"/غ", autoGold:"ادّخار الذهب الشهري", autoGoldSub:"استثمر مبلغًا ثابتًا كل شهر تلقائيًا", buyGold:"شراء الذهب", amountToBuy:"المبلغ المراد شراؤه", custom:"مبلغ آخر", goldNote:"متوافق مع الشريعة ومخصّص (تسوية فورية)، ويُحتسب ضمن زكاتك تلقائيًا.", goldBought:"تم شراء الذهب", addedHoldings:"أُضيف إلى ممتلكاتك · ويُحتسب في الزكاة",
+    sadaqahTitle:"تقريب الصدقة", roundUpToggle:"تقريب كل عملية شراء إلى أقرب درهم", thisMonth:"هذا الشهر", roundedUp:"تم تقريبه", givenYear:"هذا العام", yourCause:"جهتك المختارة", change:"تغيير", recent:"آخر عمليات التقريب", tx1:"قهوة", tx2:"بقالة", tx3:"وقود", save:"حفظ التغييرات",
+    settings:"الإعدادات", preferences:"التفضيلات", language:"اللغة", english:"الإنجليزية", numerals:"الأرقام", account:"الحساب", security:"الأمان وبصمة الوجه", support:"المساعدة والدعم",
+    profitTitle:"كيف تتحقّق أرباحك", profitNoInterest:"ربح، لا فائدة", mudarabaTitle:"مضاربة: مشاركة في الربح", mudarabaBody:"تستثمر أمانة ودائعك في أصول متوافقة مع الشريعة وتقتسم الربح المتحقّق معك بنسبة متّفق عليها — دون فائدة ثابتة مضمونة (ربا).", shareRatio:"نسبة المشاركة في الربح", expProfitVal:"متوقّع 3.9% سنويًا", howItWorks:"كيف يعمل", pst1:"تُجمَع وديعتك", pst1d:"في صندوق متوافق مع الشريعة", pst2:"تستثمرها أمانة", pst2d:"في المرابحة والصكوك وأصول أخلاقية", pst3:"يُقتسم الربح", pst3d:"يُضاف شهريًا بالنسبة المتّفق عليها", certified:"معتمد من هيئة الرقابة الشرعية في أمانة", you:"أنت", bank:"البنك",
+    byCharity:"الجهات", byCategory:"المصارف الثمانية", asnafIntro:"تُصرف الزكاة في ثمانية مصارف وردت في القرآن، توزّعها أمانة على جهات موثّقة ضمن كلٍّ منها.", asnaf1:"الفقراء", asnaf2:"المساكين", asnaf3:"العاملون عليها", asnaf4:"المؤلّفة قلوبهم", asnaf5:"في الرقاب", asnaf6:"الغارمون", asnaf7:"في سبيل الله", asnaf8:"ابن السبيل",
+    impactTitle:"أثرك", totalGiven:"إجمالي ما قدّمته", thisYearGiven:"هذا العام", familiesHelped:"أسرة مدعومة", historyHead:"سجلّ العطاء", verifiedReceipt:"إيصال موثّق", h1:"زكاة 1447", h2:"تقريب الصدقة", h3:"تبرّع رمضان", h4:"زكاة 1446", yourImpact:"أثرك", viewImpact:"سجلّ العطاء والإيصالات",
+    theme:"المظهر", lightL:"فاتح", darkL:"داكن",
+    shariaUpdated:"متوافق مع الشريعة · مُحدَّث الآن · •••• 6411", thisMonthSpent:"أُنفق هذا الشهر", ofBudget:"من الميزانية", recentActivity:"النشاط الأخير", viewAll:"عرض الكل",
+    catGroceries:"بقالة", catDining:"مطاعم", catFuel:"وقود", catToll:"رسوم طرق", catIncome:"راتب",
+    mSalary:"حكومة أبوظبي", mCarrefour:"كارفور", mTalabat:"طلبات", mAdnoc:"أدنوك", mSalik:"سالك", timeToday:"اليوم", timeYest:"أمس", roundupTag:"صدقة",
+    txnTitle:"تفاصيل العملية", category:"الفئة", paidVia:"طريقة الدفع", amanahCard:"بطاقة أمانة •••• 6411", statusL:"الحالة", completed:"مكتملة", roundupLine:"تقريب إلى الصدقة", splitBill:"تقسيم الفاتورة", getReceipt:"الإيصال", reportProblem:"الإبلاغ عن مشكلة",
+    notifsTitle:"الإشعارات", markRead:"تعليم الكل كمقروء", n1:"تم إيداع الراتب", n1s:"+18,000 د.إ من حكومة أبوظبي", n2:"ارتفع الذهب اليوم", n2s:"+1.2% — أصبحت ممتلكاتك 42,500 د.إ", n3:"الزكاة تقترب", n3s:"يكتمل حولك خلال 24 يومًا", n4:"تقريب الصدقة", n4s:"تبرّعت بـ 12.40 د.إ هذا الأسبوع", n5:"تمت مشاركة الأرباح", n5s:"+38.20 د.إ أُضيفت هذا الشهر",
+    payTitle:"إرسال الأموال", payVia:"عبر Aani · فوري", toMobile:"إلى رقم الجوال", recentR:"الأخيرون", newRecipient:"مستفيد جديد", addNote:"أضف ملاحظة (اختياري)", payNote:"تحويلات Aani مجانية وتصل خلال ثوانٍ.", instant:"فوري", toL:"إلى", sentTitle:"تم إرسال المبلغ", sentSub:"أُرسلت فورًا عبر Aani", r1:"خالد المنصوري", r2:"عائشة السويدي", r3:"الوالدة", r4:"عمر عبدالله",
+    heldTitle:"تحويل قيد المراجعة", heldH:"أوقفنا هذا التحويل مؤقتًا", heldWhy:"هذا أول تحويل لك إلى هذا المستفيد، لذا أجرينا فحصًا أمنيًا سريعًا.", heldSafe:"أموالك بأمان — لم تغادر حسابك.", onHold:"قيد المراجعة", verifyRelease:"التحقّق والإرسال", cancelRefund:"إلغاء — تبقى أموالك معك", talkHuman:"تحدّث إلى موظف · 24/7", heldNotif:"تحويل موقوف — يلزم إجراء", heldNotifSub:"1,000 د.إ إلى خالد موقوفة لفحص أمني", stNow:"الآن", attentionHome:"تحويل واحد يحتاج انتباهك",
+    helper:"المسار: الترحيب ← UAE PASS ← الرئيسية. بدّل اللغة من حسابي ← الإعدادات (أو أيقونة اللغة). يتحوّل التطبيق بالكامل بين اليمين واليسار."
+  }
+};
+const NAV = [["s-home","ti-home","navHome"],["s-home","ti-arrows-exchange","navPay"],["s-gold","ti-chart-pie","navGrow"],["s-give","ti-heart-handshake","navGive"],["s-settings","ti-user","navProfile"]];
+const GROW=["s-gold","s-golddone"];
+const GIVE=["s-give","s-zakat","s-assets","s-nisab","s-result","s-recip","s-review","s-done","s-sadaqah","s-impact"];
+let lang="en", numMode="west", theme="light", hist=[];
+const EAST="٠١٢٣٤٥٦٧٨٩", WEST="0123456789";
+
+function activeIdx(cur){ if(cur==='s-home')return 0; if(GROW.includes(cur))return 2; if(GIVE.includes(cur))return 3; if(cur==='s-settings')return 4; return -1; }
+function buildNav(){
+  document.querySelectorAll('[data-nav]').forEach(nav=>{
+    const cur=nav.closest('.screen').id; nav.innerHTML=""; const ai=activeIdx(cur);
+    NAV.forEach(([target,icon,key],i)=>{
+      const b=document.createElement('button'); b.className="tab"+(i===ai?" on":"");
+      b.innerHTML=`<span class="dot"></span><i class="ti ${icon}"></i><span data-i18n="${key}">${T[lang][key]}</span>`;
+      b.onclick=()=>go(target); nav.appendChild(b);
+    });
+  });
+}
+function applyNum(target){
+  const map=target==='east'?EAST:WEST, from=target==='east'?WEST:EAST;
+  const walk=document.createTreeWalker(document.getElementById('app'),NodeFilter.SHOW_TEXT);
+  let n; while(n=walk.nextNode()){
+    if(n.parentNode && /SCRIPT|STYLE/.test(n.parentNode.nodeName)) continue;
+    if(n.parentNode && n.parentNode.closest && n.parentNode.closest('[data-seg-west],[data-seg-east]')) continue;
+    n.nodeValue=n.nodeValue.replace(/[0-9٠-٩]/g,c=>{const i=from.indexOf(c);return i>=0?map[i]:c;});
+  }
+}
+function render(){
+  document.documentElement.lang=lang;
+  const app=document.getElementById('app');
+  app.dir=(lang==='ar')?'rtl':'ltr'; app.classList.toggle('rtl',lang==='ar'); app.classList.toggle('ltr',lang==='en');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n'); if(T[lang][k]!==undefined) el.textContent=T[lang][k];});
+  buildNav();
+  document.querySelector('[data-seg-en]')?.classList.toggle('on',lang==='en');
+  document.querySelector('[data-seg-ar]')?.classList.toggle('on',lang==='ar');
+  document.querySelector('[data-seg-west]')?.classList.toggle('on',numMode==='west');
+  document.querySelector('[data-seg-east]')?.classList.toggle('on',numMode==='east');
+  document.querySelector('[data-seg-light]')?.classList.toggle('on',theme==='light');
+  document.querySelector('[data-seg-dark]')?.classList.toggle('on',theme==='dark');
+  document.getElementById('helper').textContent=T[lang].helper;
+  applyNum(numMode);
+}
+function animateCounts(scope){
+  if(document.body.classList.contains('embed')) return;
+  scope.querySelectorAll('[data-count]').forEach(el=>{
+    const t=+el.dataset.count, dur=850, start=performance.now();
+    function f(now){ const p=Math.min((now-start)/dur,1); const e=1-Math.pow(1-p,3);
+      el.textContent=Math.round(t*e).toLocaleString('en-US');
+      if(p<1){requestAnimationFrame(f);} else {el.textContent=t.toLocaleString('en-US'); applyNum(numMode);} }
+    el.textContent='0'; requestAnimationFrame(f);
+  });
+}
+function go(id){const cur=document.querySelector('.screen.active'); if(cur&&cur.id!==id) hist.push(cur.id); show(id);}
+function back(){show(hist.pop()||'s-home');}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); const el=document.getElementById(id); el.classList.add('active'); render(); el.scrollTop=0; animateCounts(el);}
+function setLang(l){lang=l; render();}
+function quickLang(){lang=(lang==='en')?'ar':'en'; render();}
+function setNum(m){numMode=m; render();}
+function setTheme(t){theme=t; document.getElementById('app').classList.toggle('dark',t==='dark'); render();}
+function recipMode(m){document.getElementById('recip-charity').style.display=(m==='charity')?'':'none'; document.getElementById('recip-cat').style.display=(m==='cat')?'':'none'; document.querySelector('[data-rmode="charity"]').classList.toggle('on',m==='charity'); document.querySelector('[data-rmode="cat"]').classList.toggle('on',m==='cat');}
+function selOpt(el){el.parentNode.querySelectorAll('[data-basis]').forEach(o=>o.classList.remove('sel')); el.classList.add('sel');}
+function selMulti(el){el.classList.toggle('sel');}
+function selChip(el){el.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('on')); el.classList.add('on');}
+function toggleSwitch(el){el.classList.toggle('on');}
+let payAmount='500';
+function payAmt(el){payAmount=el.dataset.v; el.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('on')); el.classList.add('on'); document.querySelectorAll('.payval').forEach(e=>e.textContent=payAmount); applyNum(numMode);}
+document.querySelectorAll('[data-back]').forEach(b=>b.onclick=back);
+(function init(){
+  const p=new URLSearchParams(location.search);
+  if(p.get('lang')==='ar'||p.get('lang')==='en') lang=p.get('lang');
+  if(p.get('num')==='east'||p.get('num')==='west') numMode=p.get('num');
+  if(p.get('theme')==='dark'){theme='dark'; document.getElementById('app').classList.add('dark');}
+  if(p.has('embed')) document.body.classList.add('embed');
+  const q=p.get('screen');
+  const h=location.hash.slice(1);
+  const start=(q && document.getElementById(q))?q:((h && document.getElementById(h))?h:'s-onboard');
+  show(start);
+  if(start==='s-recip' && p.get('rmode')==='cat') recipMode('cat');
+})();
+</script>
+</body>
+</html>
