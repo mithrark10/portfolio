@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analance MLOps — Mithra Ramkumar</title>
+<script>if("scrollRestoration"in history)history.scrollRestoration="manual";addEventListener("load",function(){if(!location.hash)scrollTo(0,0);});</script>
+</head>
+<body>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Analance MLOps, Designing data science around business outcomes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:host{
+  /* Dark "data terminal" palette */
+  --paper:#0E1320;
+  --paper-2:#161D2E;
+  --card:#171F31;
+  --ink:#080B14;
+  --ink-2:#131A2A;
+  --ink-3:#1B2335;
+  --graphite:#E4E8F1;
+  --slate:#9BA7BE;
+  --slate-2:#6B7790;
+  --on-dark:#E7EAF1;
+  --on-dark-mute:#9AA3B8;
+  --line:rgba(255,255,255,.10);
+  --line-dark:rgba(255,255,255,.10);
+  --cobalt:#22D3EE;
+  --cobalt-soft:#67E8F9;
+  --cobalt-tint:rgba(34,211,238,.10);
+  --ember:#F0A845;
+  --ember-tint:rgba(240,168,69,.14);
+
+  --display:'Geist','Segoe UI',sans-serif;
+  --sans:'Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'Geist Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
+
+  --maxw:1120px;
+  --gutter:clamp(20px,5vw,72px);
+  --nav-h:58px;
+}
+
+/* ============ RESET ============ */
+*{box-sizing:border-box;margin:0;padding:0}
+:host{scroll-behavior:smooth}
+:host{
+  font-family:var(--sans);
+  background:var(--paper);
+  color:var(--graphite);
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+section{scroll-margin-top:calc(var(--nav-h) + 18px)}
+
+/* ============ TYPE HELPERS ============ */
+.eyebrow{
+  font-family:var(--mono);
+  font-size:12px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--cobalt);
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+}
+.eyebrow.on-dark{color:var(--cobalt-soft)}
+.eyebrow::before{
+  content:"";
+  width:22px;height:1px;background:currentColor;display:inline-block;opacity:.7;
+}
+h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.05;letter-spacing:-.01em}
+h2{font-size:clamp(28px,4.4vw,50px)}
+h3{font-size:clamp(20px,2.4vw,27px);line-height:1.12}
+em{font-style:italic}
+.lede{font-size:clamp(18px,2.1vw,23px);line-height:1.5;color:var(--graphite)}
+.muted{color:var(--slate)}
+p{max-width:62ch}
+
+/* ============ LAYOUT ============ */
+.wrap{max-width:var(--maxw);margin-inline:auto;padding-inline:var(--gutter)}
+.section{padding-block:clamp(64px,9vw,128px)}
+.section--dark{background:var(--ink);color:var(--on-dark)}
+.section--dark h2,.section--dark h3{color:#fff}
+.section--dark .muted{color:var(--on-dark-mute)}
+.section--dark .lede{color:var(--on-dark)}
+.section--tint{background:var(--paper-2)}
+.chapter-head{max-width:760px;margin-bottom:clamp(38px,5vw,64px)}
+.chapter-head h2{margin-top:18px}
+.chapter-head .lede{margin-top:22px;color:var(--slate)}
+.section--dark .chapter-head .lede{color:var(--on-dark-mute)}
+
+/* ============ NAV RAIL (signature: pipeline) ============ */
+.rail{
+  position:sticky;top:0;z-index:60;height:var(--nav-h);
+  display:flex;align-items:center;
+  background:rgba(14,19,32,.82);
+  backdrop-filter:saturate(140%) blur(12px);
+  -webkit-backdrop-filter:saturate(140%) blur(12px);
+  border-bottom:1px solid var(--line);
+}
+.rail .wrap{display:flex;align-items:center;justify-content:space-between;width:100%}
+.rail__brand{font-family:var(--mono);font-size:13px;letter-spacing:.04em;color:var(--graphite);display:flex;align-items:center;gap:9px}
+.rail__brand b{font-weight:500}
+.rail__dot{width:9px;height:9px;border-radius:2px;background:var(--cobalt);transform:rotate(45deg)}
+.rail__nav{display:flex;align-items:center;gap:16px}
+.rail__current{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--cobalt);min-width:96px;text-align:right}
+.pipeline{display:flex;align-items:center;gap:0;position:relative;padding-inline:6px}
+.pipeline__line{position:absolute;left:12px;right:12px;top:50%;transform:translateY(-50%);height:1px;background:var(--line);z-index:0}
+.pnode{
+  position:relative;z-index:1;display:flex;align-items:center;justify-content:center;
+  padding:8px 11px;cursor:pointer;background:transparent;border:0;line-height:0;
+}
+.pnode i{width:11px;height:11px;border-radius:50%;background:var(--paper);border:1.5px solid var(--line);transition:all .25s ease;display:block}
+.pnode:hover i{border-color:var(--cobalt)}
+.pnode.is-active i{background:var(--cobalt);border-color:var(--cobalt);box-shadow:0 0 0 4px var(--cobalt-tint)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:560px){
+  .rail__brand b{display:none}
+  .rail__current{display:none}
+  .pnode{padding:8px 8px}
+}
+
+/* ============ HERO ============ */
+.hero{position:relative;background:var(--ink);color:var(--on-dark);overflow:hidden;padding-block:clamp(54px,9vw,104px)}
+.hero__grid{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.05) 1px,transparent 1px);background-size:26px 26px;mask-image:radial-gradient(ellipse 90% 70% at 50% 30%,#000 30%,transparent 80%);pointer-events:none}
+.hero__glow{position:absolute;top:-15%;right:-5%;width:60vw;height:60vw;max-width:760px;max-height:760px;background:radial-gradient(circle,rgba(43,73,245,.34),transparent 62%);filter:blur(20px);pointer-events:none}
+.hero .wrap{position:relative;z-index:2}
+.hero__meta-top{display:flex;flex-wrap:wrap;gap:18px;font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--cobalt-soft);margin-bottom:30px}
+.hero__meta-top span{color:var(--on-dark-mute)}
+.hero h1{font-size:clamp(38px,7vw,86px);font-weight:400;color:#fff;max-width:16ch}
+.hero h1 em{color:var(--cobalt-soft);font-weight:500}
+.hero__sub{margin-top:30px;font-size:clamp(17px,1.9vw,21px);line-height:1.55;max-width:60ch;color:var(--on-dark)}
+.hero__facts{margin-top:46px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line-dark);border:1px solid var(--line-dark);border-radius:14px;overflow:hidden}
+.hfact{background:var(--ink);padding:20px 22px}
+.hfact dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--on-dark-mute);margin-bottom:9px}
+.hfact dd{font-family:var(--display);font-size:18px;color:#fff;line-height:1.25}
+@media(max-width:760px){.hero__facts{grid-template-columns:repeat(2,1fr)}}
+
+/* hero lattice */
+.lattice{margin-top:56px;width:100%;height:auto;overflow:visible}
+.lat-edge{fill:none;stroke:var(--cobalt-soft);stroke-width:1.6;opacity:.55}
+.lat-edge.pulse{stroke-dasharray:6 200;animation:dash 3.4s linear infinite}
+.lat-node{fill:var(--ink-2);stroke:var(--cobalt-soft);stroke-width:1.6}
+.lat-node.data{fill:rgba(43,73,245,.22);stroke:var(--cobalt-soft)}
+.lat-node.recipe{fill:rgba(224,144,46,.22);stroke:var(--ember)}
+.lat-node.model{fill:rgba(43,73,245,.3);stroke:#fff}
+.lat-label{fill:var(--on-dark-mute);font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.lat-dot{fill:var(--cobalt-soft)}
+.lat-dot.amber{fill:var(--ember)}
+@keyframes dash{to{stroke-dashoffset:-206}}
+
+/* ============ STAT STRIP ============ */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(20px,3vw,40px)}
+.stat{border-top:2px solid var(--cobalt);padding-top:18px}
+.stat:nth-child(2){border-color:var(--ember)}
+.stat__num{font-family:var(--display);font-size:clamp(40px,5.5vw,62px);line-height:1;font-weight:500;letter-spacing:-.02em}
+.stat__num .u{font-size:.5em;vertical-align:.18em;margin-left:2px;color:var(--slate)}
+.stat__lab{margin-top:12px;font-size:14.5px;color:var(--slate);max-width:24ch}
+.stat__sub{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--slate-2);margin-top:6px}
+@media(max-width:860px){.stats{grid-template-columns:repeat(2,1fr);row-gap:34px}}
+
+/* ============ TWO-COL PROSE ============ */
+.prose-2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,5vw,72px);align-items:start}
+.prose-2 p + p{margin-top:18px}
+@media(max-width:820px){.prose-2{grid-template-columns:1fr;gap:28px}}
+
+/* ============ POSITIONING CHART ============ */
+.posmap{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:clamp(20px,3vw,34px);box-shadow:0 1px 0 rgba(13,18,30,.03)}
+.posmap svg{width:100%;height:auto;display:block}
+.pm-axis{stroke:var(--line);stroke-width:1}
+.pm-grid{stroke:var(--line);stroke-width:1;stroke-dasharray:2 5;opacity:.7}
+.pm-axis-label{font-family:var(--mono);font-size:11px;letter-spacing:.06em;fill:var(--slate);text-transform:uppercase}
+.pm-quad{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;fill:var(--slate-2)}
+.pm-dot{fill:#fff;stroke:var(--slate);stroke-width:1.5}
+.pm-dot-lab{font-family:var(--sans);font-size:13px;fill:var(--graphite);font-weight:500}
+.pm-us circle{fill:var(--cobalt);stroke:#fff;stroke-width:2}
+.pm-us text{fill:var(--cobalt);font-weight:700;font-size:14px}
+.pm-halo{fill:var(--cobalt-tint)}
+
+/* ============ RESEARCH METHODS ============ */
+.methods{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:8px}
+.method{background:var(--card);padding:24px 22px}
+.method b{font-family:var(--display);font-size:34px;font-weight:500;display:block;line-height:1}
+.method span{display:block;margin-top:10px;font-size:14px;color:var(--slate)}
+.method em{font-family:var(--mono);font-style:normal;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--cobalt);display:block;margin-top:3px}
+@media(max-width:760px){.methods{grid-template-columns:repeat(2,1fr)}}
+
+/* ============ PERSONAS ============ */
+.personas{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.persona{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 26px 24px;position:relative}
+.persona__role{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--cobalt)}
+.persona h3{margin:10px 0 4px;font-size:24px}
+.persona__need{color:var(--slate);font-size:15px}
+.persona__quote{margin-top:18px;padding-top:18px;border-top:1px solid var(--line);font-family:var(--display);font-style:italic;font-size:17px;line-height:1.4;color:var(--graphite)}
+@media(max-width:680px){.personas{grid-template-columns:1fr}}
+
+/* ============ FINDINGS ============ */
+.finding{display:grid;grid-template-columns:64px 1fr;gap:8px 26px;padding:28px 0;border-top:1px solid var(--line-dark)}
+.finding:first-of-type{border-top:0}
+.finding__n{font-family:var(--mono);font-size:13px;color:var(--cobalt-soft);padding-top:7px}
+.finding h3{color:#fff}
+.finding p{color:var(--on-dark-mute);margin-top:10px;max-width:64ch}
+.finding__tag{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--cobalt-soft);border:1px solid var(--line-dark);border-radius:999px;padding:4px 12px}
+@media(max-width:620px){.finding{grid-template-columns:1fr;gap:4px}.finding__n{padding-top:0}}
+
+/* ============ PRINCIPLES ============ */
+.principles{counter-reset:p;border-top:1px solid var(--line)}
+.principle{counter-increment:p;display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:baseline;padding:26px 0;border-bottom:1px solid var(--line)}
+.principle__n{font-family:var(--mono);font-size:13px;color:var(--cobalt)}
+.principle__n::before{content:"P" counter(p)}
+.principle h3{font-size:clamp(21px,2.6vw,30px)}
+.principle p{margin-top:8px;color:var(--slate);max-width:70ch}
+.principle strong{color:var(--ember);font-weight:600}
+
+/* ============ MODULE TABS ============ */
+.tabs{display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);margin-bottom:34px}
+.tab{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--slate);background:transparent;border:0;padding:13px 16px;cursor:pointer;position:relative;transition:color .2s}
+.tab[aria-selected="true"]{color:var(--cobalt)}
+.tab[aria-selected="true"]::after{content:"";position:absolute;left:16px;right:16px;bottom:-1px;height:2px;background:var(--cobalt)}
+.tab:hover{color:var(--graphite)}
+.panel{display:none;grid-template-columns:1fr 1.18fr;gap:clamp(28px,4vw,56px);align-items:center;animation:fade .4s ease}
+.panel.is-open{display:grid}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.panel__ptag{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ember);margin-bottom:14px}
+.panel h3{margin-bottom:16px}
+.insight{display:flex;gap:12px;margin-top:18px;font-size:15px}
+.insight .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--cobalt);min-width:64px;padding-top:3px;flex-shrink:0}
+.insight .v{color:var(--graphite)}
+.insight .v.mut{color:var(--slate)}
+@media(max-width:840px){.panel.is-open{grid-template-columns:1fr;gap:30px}.panel__media{order:-1}}
+
+/* ============ SCREEN FRAME ============ */
+.screen{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--card);box-shadow:0 24px 60px -28px rgba(13,18,40,.35),0 2px 6px rgba(13,18,40,.05)}
+.screen__bar{display:flex;align-items:center;gap:14px;padding:11px 16px;background:var(--paper-2);border-bottom:1px solid var(--line)}
+.screen__dots{display:flex;gap:6px}
+.screen__dots i{width:10px;height:10px;border-radius:50%;background:#CBD2DF;display:block}
+.screen__url{font-family:var(--mono);font-size:11.5px;color:var(--slate);background:var(--card);border:1px solid var(--line);border-radius:7px;padding:5px 12px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.screen img{width:100%;display:block}
+
+/* ============ OUTCOMES ============ */
+.bigstats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line-dark);border:1px solid var(--line-dark);border-radius:16px;overflow:hidden}
+.bigstat{background:var(--ink);padding:34px 30px}
+.bigstat__num{font-family:var(--display);font-size:clamp(46px,6vw,72px);line-height:1;font-weight:500;color:#fff}
+.bigstat__num .u{font-size:.42em;color:var(--cobalt-soft);margin-left:4px;vertical-align:.2em}
+.bigstat__lab{margin-top:16px;color:var(--on-dark-mute);font-size:14.5px;max-width:26ch}
+.bigstat__from{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--slate-2);margin-top:10px}
+@media(max-width:780px){.bigstats{grid-template-columns:1fr}}
+
+.quotes{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:46px}
+.quote{background:var(--ink-2);border:1px solid var(--line-dark);border-radius:16px;padding:30px}
+.quote p{font-family:var(--display);font-style:italic;font-size:clamp(19px,2.2vw,24px);line-height:1.4;color:#fff;max-width:none}
+.quote footer{margin-top:18px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--cobalt-soft)}
+@media(max-width:680px){.quotes{grid-template-columns:1fr}}
+
+/* ============ REFLECTION ============ */
+.reflect{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,4vw,56px)}
+.reflect h3{margin-bottom:14px}
+.reflect ul{list-style:none}
+.reflect li{padding:14px 0;border-top:1px solid var(--line);font-size:15.5px;color:var(--slate);display:grid;grid-template-columns:18px 1fr;gap:12px}
+.reflect li::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--cobalt);transform:rotate(45deg);margin-top:8px}
+.reflect li.next::before{background:var(--ember)}
+.reflect li b{color:var(--graphite);font-weight:600}
+@media(max-width:760px){.reflect{grid-template-columns:1fr;gap:30px}}
+
+/* ============ FOOTER ============ */
+.foot{background:var(--ink);color:var(--on-dark);padding-block:clamp(54px,7vw,80px)}
+.foot h2{color:#fff;max-width:18ch}
+.foot .wrap{display:grid;grid-template-columns:1.4fr 1fr;gap:40px;align-items:end}
+.foot__meta{font-family:var(--mono);font-size:12px;line-height:2;color:var(--on-dark-mute)}
+.foot__meta b{color:#fff;font-weight:500}
+.foot__note{grid-column:1/-1;margin-top:42px;padding-top:22px;border-top:1px solid var(--line-dark);font-family:var(--mono);font-size:11px;color:var(--slate-2);letter-spacing:.02em;max-width:none}
+@media(max-width:680px){.foot .wrap{grid-template-columns:1fr;gap:28px}}
+
+/* ============ REVEAL ============ */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+.reveal[data-d="1"]{transition-delay:.08s}
+.reveal[data-d="2"]{transition-delay:.16s}
+.reveal[data-d="3"]{transition-delay:.24s}
+
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;scroll-behavior:auto!important}
+  .reveal{opacity:1;transform:none;transition:none}
+}
+:focus-visible{outline:2px solid var(--cobalt);outline-offset:3px;border-radius:3px}
+
+/* ============ LIVE PROTOTYPE ============ */
+.proto-note{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 26px;margin-bottom:22px}
+.proto-note__ptag{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ember)}
+.proto-note h3{font-size:clamp(19px,2.3vw,26px);margin:4px 0 14px}
+.proto-note__insights{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.proto-note .insight{margin-top:0}
+@media(max-width:760px){.proto-note__insights{grid-template-columns:1fr;gap:11px}}
+.proto-hint{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--cobalt);margin-left:auto;white-space:nowrap}
+.proto-hint b{width:7px;height:7px;border-radius:50%;background:var(--cobalt);display:block;animation:blink 1.8s ease-in-out infinite}
+@keyframes blink{50%{opacity:.25}}
+.screen--live .screen__bar{flex-wrap:wrap;gap:10px}
+.screen--live .screen__url{flex:1;min-width:120px}
+
+.tp{--tp-blue:#1c64f2;--tp-blue-d:#1750c5;--tp-ink:#1f2733;--tp-sub:#717c8c;--tp-line:#e7ebf1;--tp-side:#eef2f9;--tp-amber:#ec9a2e;--tp-hi:#eaf1fe;
+  display:flex;height:clamp(460px,64vh,610px);background:#fff;color:var(--tp-ink);font-size:13px;line-height:1.45;overflow:hidden}
+.tp *{box-sizing:border-box}
+.tp__side{width:120px;flex-shrink:0;background:var(--tp-side);border-right:1px solid var(--tp-line);padding:14px 0;display:flex;flex-direction:column;gap:2px}
+.tp__brandmark{width:26px;height:26px;border-radius:7px;background:var(--tp-blue);margin:0 auto 14px;position:relative}
+.tp__brandmark::after{content:"";position:absolute;inset:7px;border:2px solid #fff;border-radius:3px}
+.tp__navitem{display:flex;flex-direction:column;align-items:center;gap:5px;padding:11px 6px;cursor:pointer;background:none;border:0;border-left:3px solid transparent;color:var(--tp-sub);font-size:11px;width:100%;transition:color .15s,background .15s}
+.tp__navitem svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.6}
+.tp__navitem:hover{color:var(--tp-ink)}
+.tp__navitem.is-active{color:var(--tp-blue);background:#fff;border-left-color:var(--tp-blue);font-weight:600}
+.tp__main{flex:1;display:flex;flex-direction:column;min-width:0}
+.tp__top{display:flex;align-items:center;gap:7px;padding:11px 16px;border-bottom:1px solid var(--tp-line);font-size:12px;color:var(--tp-sub);flex-shrink:0;flex-wrap:wrap}
+.tp__crumbpill{background:var(--tp-hi);color:var(--tp-blue);border-radius:6px;padding:3px 9px;font-weight:600}
+.tp__crumb-sep{opacity:.45}
+.tp__crumb-cur{color:var(--tp-ink);font-weight:600}
+.tp__topicons{margin-left:auto;display:flex;gap:11px;color:var(--tp-blue);opacity:.65}
+.tp__body{flex:1;overflow:auto;position:relative;padding:20px}
+.tp-module{display:none}
+.tp-module.is-active{display:block}
+
+.tp-tabs{display:flex;gap:3px;flex-wrap:wrap;align-items:center}
+.tp-tab{font-size:12px;color:var(--tp-blue);background:none;border:0;padding:6px 11px;border-radius:7px;cursor:pointer}
+.tp-tab:hover{background:var(--tp-hi)}
+.tp-tab.is-active{background:var(--tp-hi);font-weight:600}
+.tp-toolbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tp-search{border:1px solid var(--tp-line);border-radius:7px;padding:6px 10px;font-size:12px;color:var(--tp-sub);min-width:130px;max-width:220px;background:#fff;font-family:inherit}
+.tp-act{display:inline-flex;align-items:center;gap:5px;color:var(--tp-blue);font-size:12.5px;font-weight:600;background:none;border:0;cursor:pointer;padding:6px 8px;border-radius:7px}
+.tp-act:hover{background:var(--tp-hi)}
+.tp-act .pl{font-size:15px;line-height:1}
+.tp-spacer{flex:1;min-width:8px}
+.tp-pane{display:none}
+.tp-pane.is-open{display:block}
+
+.tp-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.tp-table th{text-align:left;font-weight:600;color:var(--tp-ink);padding:9px 12px;border-bottom:1px solid var(--tp-line);white-space:nowrap;background:#fafbfd}
+.tp-table td{padding:9px 12px;border-bottom:1px solid var(--tp-line);color:#3b4554;white-space:nowrap}
+.tp-table tbody tr:last-child td{border-bottom:0}
+.tp-table.tp-rows tbody tr{cursor:pointer}
+.tp-table.tp-rows tbody tr:hover{background:var(--tp-hi)}
+.tp-link{color:var(--tp-blue);font-weight:600}
+.tp-tablewrap{overflow:auto;border:1px solid var(--tp-line);border-radius:10px}
+.tp-title{font-size:17px;font-weight:700}
+.tp-meta{font-size:11.5px;color:var(--tp-sub);margin:3px 0 14px}
+.tp-note{font-size:12.5px;color:var(--tp-sub);line-height:1.65;max-width:none}
+
+.tp-ovhead{display:flex;gap:14px;align-items:flex-start;margin-bottom:18px}
+.tp-ovhead .av{width:48px;height:48px;border-radius:9px;background:#dde4ee;flex-shrink:0}
+.tp-ovhead h4{font-size:15px;margin-bottom:4px}
+.tp-ovhead p{font-size:12.5px;color:var(--tp-sub);max-width:74ch}
+.tp-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+.tp-card{border:1px solid var(--tp-line);border-radius:12px;padding:18px}
+.tp-card__ic{width:32px;height:32px;color:var(--tp-blue);margin-bottom:10px}
+.tp-card__ic svg{width:32px;height:32px;stroke:currentColor;fill:none}
+.tp-card h5{font-size:14px;margin-bottom:8px}
+.tp-card a{display:block;color:var(--tp-blue);font-size:12.5px;padding:3px 0;cursor:pointer}
+.tp-card a:hover{text-decoration:underline}
+.tp-log{border:1px solid var(--tp-line);border-radius:12px;padding:16px 18px}
+.tp-log b{font-size:13px}
+.tp-log p{font-size:12.5px;color:var(--tp-sub);margin-top:6px}
+@media(max-width:680px){.tp-cards{grid-template-columns:1fr}}
+
+.tp-canvas{position:relative;height:300px;border:1px dashed var(--tp-line);border-radius:10px;background:#fafbfd;overflow:hidden;margin-top:4px}
+.tp-canvas svg.edges{position:absolute;inset:0;width:100%;height:100%}
+.tp-node{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;background:none;border:0;color:var(--tp-sub);font-size:10px;text-align:center;width:96px}
+.tp-node .box{width:42px;height:42px;border-radius:10px;background:var(--tp-blue);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 5px 12px rgba(28,100,242,.28)}
+.tp-node .box.out{background:#fff;border:1.6px solid var(--tp-blue);color:var(--tp-blue)}
+.tp-node .box.dash{background:#fff;border:1.6px dashed var(--tp-blue);color:var(--tp-blue);box-shadow:none}
+.tp-node .circ{width:34px;height:34px;border-radius:50%;background:var(--tp-amber);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 5px 12px rgba(236,154,46,.32)}
+.tp-node.sel .box,.tp-node.sel .circ{outline:3px solid rgba(28,100,242,.28);outline-offset:2px}
+.tp-nodehint{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);background:var(--tp-ink);color:#fff;font-size:11px;padding:6px 12px;border-radius:7px;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;max-width:90%}
+.tp-nodehint.show{opacity:1}
+
+.tp-panel{position:absolute;top:0;right:0;height:100%;width:min(420px,74%);background:#fff;border-left:1px solid var(--tp-line);box-shadow:-18px 0 40px -24px rgba(20,30,60,.4);transform:translateX(103%);transition:transform .32s cubic-bezier(.2,.7,.2,1);display:flex;flex-direction:column;z-index:6}
+.tp-panel.is-open{transform:none}
+.tp-panel.wide{width:min(560px,90%)}
+.tp-panel__head{display:flex;align-items:center;gap:10px;padding:15px 18px;border-bottom:1px solid var(--tp-line)}
+.tp-panel__head h4{font-size:15px;font-weight:700}
+.tp-x{margin-left:auto;background:none;border:0;font-size:20px;color:var(--tp-sub);cursor:pointer;line-height:1;padding:2px 6px}
+.tp-x:hover{color:var(--tp-ink)}
+.tp-panel__body{flex:1;overflow:auto;padding:16px 18px}
+.tp-scrim{position:absolute;inset:0;background:rgba(20,28,45,.10);opacity:0;pointer-events:none;transition:opacity .3s;z-index:5}
+.tp-scrim.is-open{opacity:1;pointer-events:auto}
+
+.tp-mrow{display:flex;gap:12px;align-items:flex-start;padding:13px 2px;border-bottom:1px solid var(--tp-line);cursor:pointer;width:100%;background:none;border-left:0;border-right:0;border-top:0;text-align:left}
+.tp-mrow:hover{background:var(--tp-hi)}
+.tp-mrow .hex{width:26px;height:26px;color:var(--tp-blue);flex-shrink:0}
+.tp-mrow .hex svg{width:26px;height:26px;stroke:currentColor;fill:none}
+.tp-mrow b{font-size:13px}
+.tp-mrow span{display:block;font-size:11.5px;color:var(--tp-sub);margin-top:3px}
+
+.tp-anrow{padding:13px 6px;border-bottom:1px solid var(--tp-line);cursor:pointer;border-radius:6px}
+.tp-anrow:hover{background:var(--tp-hi)}
+.tp-anrow.sel{background:var(--tp-hi);box-shadow:inset 3px 0 0 var(--tp-blue)}
+.tp-anrow b{font-size:13px;display:flex;align-items:center;gap:9px}
+.tp-anrow .fl{width:22px;height:22px;color:var(--tp-blue);flex-shrink:0}
+.tp-anrow .fl svg{width:22px;height:22px;stroke:currentColor;fill:none}
+.tp-anrow p{font-size:12px;color:var(--tp-sub);margin-top:5px;padding-left:31px}
+
+.tp-bars{display:flex;flex-direction:column;gap:11px;margin-top:4px}
+.tp-bar{display:grid;grid-template-columns:96px 1fr 42px;gap:10px;align-items:center;font-size:12px}
+.tp-bar .lab{color:var(--tp-ink);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tp-bar .track{height:14px;background:#eef2f8;border-radius:4px;overflow:hidden}
+.tp-bar .fill{height:100%;background:linear-gradient(90deg,var(--tp-blue),#5b8bff);border-radius:4px;width:0;transition:width .85s cubic-bezier(.2,.7,.2,1)}
+.tp-bar .val{color:var(--tp-sub);font-variant-numeric:tabular-nums}
+
+.tp-subtabs{display:flex;gap:14px;margin:2px 0 14px;border-bottom:1px solid var(--tp-line);flex-wrap:wrap}
+.tp-subtab{font-size:12px;color:var(--tp-sub);background:none;border:0;border-bottom:2px solid transparent;padding:8px 2px;cursor:pointer}
+.tp-subtab.is-active{color:var(--tp-blue);border-bottom-color:var(--tp-blue);font-weight:600}
+.tp-toptabs{display:flex;gap:3px;flex-wrap:wrap}
+.tp-toptab{font-size:12px;color:var(--tp-sub);background:none;border:0;padding:6px 10px;border-radius:7px;cursor:pointer}
+.tp-toptab.is-active{background:var(--tp-hi);color:var(--tp-blue);font-weight:600}
+.tp-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tp-metric{border:1px solid var(--tp-line);border-radius:9px;padding:13px}
+.tp-metric b{display:block;font-size:22px;color:var(--tp-ink);line-height:1.1}
+.tp-metric span{font-size:11px;color:var(--tp-sub)}
+.tp-badge{display:inline-block;font-size:10.5px;padding:2px 8px;border-radius:999px;background:#e4f6ec;color:#1f8a4c;font-weight:600}
+.tp-badge.warn{background:#fdf0db;color:#b5781a}
+
+@media(max-width:720px){
+  .tp__side{width:60px}
+  .tp__navitem{font-size:0;gap:0;padding:12px 4px}
+  .tp__navitem svg{width:22px;height:22px}
+  .tp-panel,.tp-panel.wide{width:100%}
+  .tp__body{padding:14px}
+  .tp-metrics{grid-template-columns:1fr 1fr}
+}
+@media(prefers-reduced-motion:reduce){
+  .tp-panel{transition:none}.tp-bar .fill{transition:none}.proto-hint b{animation:none}.tp-nodehint{transition:none}
+}
+
+
+/* ===== trimmed/interactive sections ===== */
+.tension{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:44px}
+.tension__c{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 22px}
+.tension__c .ic{width:30px;height:30px;color:var(--cobalt);margin-bottom:12px}
+.tension__c .ic svg{width:30px;height:30px}
+.tension__c.warn .ic{color:var(--ember)}
+.tension__c b{font-family:var(--display);font-size:19px;font-weight:500;display:block;margin-bottom:6px}
+.tension__c span{font-size:14px;color:var(--slate)}
+@media(max-width:760px){.tension{grid-template-columns:1fr}}
+
+.posmap{margin-top:0}
+.pm-cat{cursor:pointer}
+.pm-cat:focus{outline:none}
+.pm-dot{transition:r .15s ease,fill .15s ease,stroke .15s ease}
+.pm-cat:hover .pm-dot,.pm-cat:focus .pm-dot{fill:var(--cobalt-tint);stroke:var(--cobalt)}
+.pm-cat:hover .pm-dot-lab,.pm-cat:focus .pm-dot-lab{fill:var(--cobalt);font-weight:700}
+.pm-us .pm-dot-lab,.pm-us text{fill:var(--cobalt);font-weight:700;font-size:14px}
+.pm-us circle:not(.pm-halo){fill:var(--cobalt);stroke:#fff;stroke-width:2}
+.pm-halo{fill:var(--cobalt-tint);animation:halo 3s ease-in-out infinite}
+@keyframes halo{50%{opacity:.45}}
+.pmcap{margin-top:18px;font-size:14.5px;color:var(--slate);min-height:2.6em;max-width:60ch}
+.pmcap b{color:var(--graphite)}
+
+.timeline{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin:30px 0 4px}
+.timeline::before{content:"";position:absolute;top:5px;left:3%;right:3%;height:2px;background:var(--line)}
+.tl-step{position:relative;padding-right:14px}
+.tl-step i{width:11px;height:11px;border-radius:50%;background:var(--cobalt);display:block;margin-bottom:12px;box-shadow:0 0 0 4px var(--paper-2)}
+.tl-step b{font-family:var(--mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--graphite);display:block;margin-bottom:2px}
+.tl-step span{font-size:12.5px;color:var(--slate)}
+@media(max-width:680px){.timeline{grid-template-columns:1fr 1fr;gap:18px 8px}.timeline::before{display:none}.tl-step i{margin-bottom:6px}}
+
+.pswitch__tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.pswitch__tab{display:flex;flex-direction:column;gap:2px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 16px;cursor:pointer;transition:border-color .2s,box-shadow .2s}
+.pswitch__tab small{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--slate-2)}
+.pswitch__tab b{font-family:var(--display);font-size:19px;font-weight:500;color:var(--graphite)}
+.pswitch__tab:hover{border-color:var(--cobalt-soft)}
+.pswitch__tab.is-active{border-color:var(--cobalt);box-shadow:0 0 0 3px var(--cobalt-tint)}
+.pswitch__tab.is-active small{color:var(--cobalt)}
+.pswitch__card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 28px;display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+.pswitch__av{width:54px;height:54px;border-radius:14px;background:var(--cobalt-tint);color:var(--cobalt);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:25px;flex-shrink:0}
+.pswitch__txt h3{margin-bottom:4px;font-size:24px}
+.pswitch__txt p{color:var(--slate);font-size:15px;max-width:52ch}
+.pswitch__want{margin-left:auto;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--cobalt);background:var(--cobalt-tint);border-radius:999px;padding:9px 15px;white-space:nowrap}
+@media(max-width:620px){.pswitch__want{margin-left:0}.pswitch__card{gap:16px}}
+
+.fx{display:grid;grid-template-columns:.92fr 1.08fr;gap:30px;align-items:start}
+.fx__list{display:flex;flex-direction:column;gap:5px}
+.fx__row{display:flex;align-items:center;gap:14px;background:transparent;border:0;border-radius:12px;padding:14px 16px;cursor:pointer;text-align:left;width:100%;transition:background .2s}
+.fx__row .fn{font-family:var(--mono);font-size:12px;color:var(--cobalt-soft);flex-shrink:0}
+.fx__row b{font-size:15px;font-weight:500;color:var(--on-dark-mute);transition:color .2s}
+.fx__row:hover{background:var(--ink-2)}
+.fx__row.is-active{background:var(--ink-2)}
+.fx__row.is-active b{color:#fff}
+.fx__detail{background:var(--ink-2);border:1px solid var(--line-dark);border-radius:18px;padding:30px 32px;min-height:236px}
+.fx__detail .big{font-family:var(--display);font-size:56px;line-height:1;color:var(--cobalt-soft);font-weight:500}
+.fx__detail h3{color:#fff;margin:12px 0 12px;font-size:clamp(20px,2.4vw,27px)}
+.fx__detail p{color:var(--on-dark-mute);font-size:15.5px;max-width:46ch}
+.fx__meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.fx__tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:6px 13px}
+.fx__tag.stat{background:rgba(110,131,250,.16);color:var(--cobalt-soft)}
+.fx__tag.link{background:rgba(224,144,46,.16);color:var(--ember)}
+@media(max-width:760px){.fx{grid-template-columns:1fr;gap:16px}.fx__detail{min-height:0}}
+
+.pcards{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:6px}
+.pcard{background:var(--ink-2);border:1px solid var(--line-dark);border-radius:14px;padding:18px}
+.pcard .pn{font-family:var(--mono);font-size:11px;color:var(--cobalt-soft)}
+.pcard b{display:block;font-family:var(--display);font-size:17px;font-weight:500;color:#fff;margin:10px 0 7px;line-height:1.12}
+.pcard span{font-size:12.5px;color:var(--on-dark-mute)}
+.pcard em{display:block;font-family:var(--mono);font-style:normal;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--slate-2);margin-top:12px}
+@media(max-width:900px){.pcards{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.pcards{grid-template-columns:1fr}}
+
+.ba{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line-dark);border:1px solid var(--line-dark);border-radius:14px;overflow:hidden}
+.ba__c{background:var(--ink);padding:20px 22px}
+.ba__c dt{font-size:13px;color:var(--on-dark-mute);margin-bottom:10px}
+.ba__c dd{font-family:var(--display);font-size:22px;color:var(--slate-2)}
+.ba__c dd .ar{margin:0 9px;color:var(--cobalt-soft)}
+.ba__c dd .now{color:#fff}
+@media(max-width:680px){.ba{grid-template-columns:1fr}}
+.quote--solo{max-width:760px}
+
+</style>
+</head>
+<body>
+
+<!-- ============ NAV RAIL ============ -->
+<nav class="rail" aria-label="Case study sections">
+  <div class="wrap">
+    <a class="rail__brand" href="#top"><span class="rail__dot"></span><b>Analance MLOps</b>&nbsp;case study</a>
+    <div class="rail__nav">
+      <span class="rail__current" id="railCurrent" aria-hidden="true">Outcome</span>
+      <div class="pipeline" role="tablist">
+        <span class="pipeline__line"></span>
+        <button class="pnode" data-go="intro" data-name="Outcome" aria-label="Go to Outcome"><i></i><span class="sr-only">Outcome</span></button>
+        <button class="pnode" data-go="problem" data-name="Problem" aria-label="Go to Problem"><i></i><span class="sr-only">Problem</span></button>
+        <button class="pnode" data-go="research" data-name="Research" aria-label="Go to Research"><i></i><span class="sr-only">Research</span></button>
+        <button class="pnode" data-go="synthesis" data-name="Synthesis" aria-label="Go to Synthesis"><i></i><span class="sr-only">Synthesis</span></button>
+        <button class="pnode" data-go="design" data-name="Design" aria-label="Go to Design"><i></i><span class="sr-only">Design</span></button>
+        <button class="pnode" data-go="reflection" data-name="Reflection" aria-label="Go to Reflection"><i></i><span class="sr-only">Reflection</span></button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero" id="top">
+  <div class="hero__grid"></div>
+  <div class="hero__glow"></div>
+  <div class="wrap">
+    <div class="hero__meta-top reveal">
+      Product design case study &nbsp;·&nbsp; <span>Data science platform</span> &nbsp;·&nbsp; <span>2024 – 2025</span>
+    </div>
+    <h1 class="reveal" data-d="1">Turning data science from a <em>pipeline</em> into a <em>path</em> a whole team can follow.</h1>
+    <p class="hero__sub reveal" data-d="2"><em>Analance MLOps</em> rebuilds the ML lifecycle around the business question, one workspace where the analyst, the data scientist, and the sponsor funding the work all see the same project.</p>
+
+    <dl class="hero__facts reveal" data-d="3">
+      <div class="hfact"><dt>My role</dt><dd>Lead Product Designer</dd></div>
+      <div class="hfact"><dt>Duration</dt><dd>10 months</dd></div>
+      <div class="hfact"><dt>Team</dt><dd>PM · 4 eng · 1 researcher</dd></div>
+      <div class="hfact"><dt>Scope</dt><dd>Research → IA → 5 modules → ship</dd></div>
+    </dl>
+
+    <!-- signature lattice -->
+    <svg class="lattice reveal" data-d="3" viewBox="0 0 1080 200" role="img" aria-label="A node graph: a dataset flows through transform recipes into prepared data, then a model, then deployment.">
+      <!-- edges -->
+      <path class="lat-edge pulse" d="M150,100 C210,100 210,58 280,58"/>
+      <path class="lat-edge pulse" d="M150,100 C210,100 210,142 280,142"/>
+      <path class="lat-edge" d="M334,58 C410,58 410,58 470,80"/>
+      <path class="lat-edge" d="M334,142 C410,142 410,142 470,120"/>
+      <path class="lat-edge pulse" d="M540,100 C620,100 640,100 720,100"/>
+      <path class="lat-edge pulse" d="M790,100 C860,100 880,100 940,100"/>
+      <!-- nodes -->
+      <g>
+        <rect class="lat-node data" x="110" y="78" width="44" height="44" rx="9"/>
+        <text class="lat-label" x="132" y="150" text-anchor="middle">Data</text>
+      </g>
+      <g>
+        <circle class="lat-node recipe" cx="307" cy="58" r="19"/>
+        <circle class="lat-node recipe" cx="307" cy="142" r="19"/>
+        <text class="lat-label" x="307" y="178" text-anchor="middle">Prepare</text>
+      </g>
+      <g>
+        <rect class="lat-node data" x="488" y="60" width="40" height="40" rx="9"/>
+        <rect class="lat-node data" x="488" y="100" width="40" height="40" rx="9"/>
+        <text class="lat-label" x="508" y="168" text-anchor="middle">Features</text>
+      </g>
+      <g>
+        <rect class="lat-node model" x="724" y="76" width="48" height="48" rx="11" transform="rotate(45 748 100)"/>
+        <text class="lat-label" x="748" y="150" text-anchor="middle">Model</text>
+      </g>
+      <g>
+        <circle class="lat-node" cx="962" cy="100" r="22" stroke="#fff"/>
+        <circle class="lat-dot" cx="962" cy="100" r="5"/>
+        <text class="lat-label" x="962" y="150" text-anchor="middle">Deploy</text>
+      </g>
+    </svg>
+  </div>
+</header>
+
+<!-- ============ STAT STRIP ============ -->
+<section class="section section--tint" id="intro">
+  <div class="wrap">
+    <div class="chapter-head reveal">
+      <span class="eyebrow">The outcome, before the process</span>
+      <h2>What changed for the teams who used it.</h2>
+      <p class="lede">Design-partner program, before launch versus two cycles after. The headline wasn't a prettier UI, it was teams reaching a <em>trusted, deployed</em> model.</p>
+    </div>
+    <div class="bigstats reveal" data-d="1">
+      <div class="bigstat"><div class="bigstat__num" data-count="78">0<span class="u">%</span></div><div class="bigstat__lab">of teams reached a deployed model</div><div class="bigstat__from">up from 34%</div></div>
+      <div class="bigstat"><div class="bigstat__num" data-count="61">0<span class="u">%</span></div><div class="bigstat__lab">of projects run by mixed teams</div><div class="bigstat__from">up from 18%</div></div>
+      <div class="bigstat"><div class="bigstat__num" data-count="4.6">0</div><div class="bigstat__lab">sponsor confidence, out of 5</div><div class="bigstat__from">prev. 2.9</div></div>
+    </div>
+    <dl class="ba reveal" data-d="1">
+      <div class="ba__c"><dt>Time to first model</dt><dd>3 wks<span class="ar">→</span><span class="now">4 days</span></dd></div>
+      <div class="ba__c"><dt>Handoffs / project</dt><dd>7<span class="ar">→</span><span class="now">2</span></dd></div>
+      <div class="ba__c"><dt>Tools / project</dt><dd>5<span class="ar">→</span><span class="now">1</span></dd></div>
+      <div class="ba__c"><dt>Usability (SUS)</dt><dd>62<span class="ar">→</span><span class="now">81</span></dd></div>
+    </dl>
+    <blockquote class="quote quote--solo reveal" data-d="1" style="margin-top:18px">
+      <p>“I opened the project, saw what was driving the model, and I don't write code. That had never happened before.”</p>
+      <footer>Business sponsor · design-partner cohort</footer>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ============ PROBLEM ============ -->
+<section class="section" id="problem">
+  <div class="wrap">
+    <div class="chapter-head reveal">
+      <span class="eyebrow">The problem</span>
+      <h2>One journey. Tools that treat it as someone else's job.</h2>
+      <p class="lede">The lifecycle is a relay across five tools and three roles, and the baton drops at almost every exchange.</p>
+    </div>
+
+    <div class="tension reveal" data-d="1">
+      <div class="tension__c"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></div><b>Code-first</b><span>Total control, but everyone except the data scientist is locked out.</span></div>
+      <div class="tension__c warn"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l18 18M10.6 10.7a2 2 0 002.8 2.8M9.4 5.2A9.7 9.7 0 0112 5c5 0 9 4.5 9 7a12 12 0 01-2.2 3M6.1 6.2C3.7 7.6 2 10 2 12c0 1.7 3 6 9 6 1 0 2-.1 2.8-.4"/></svg></div><b>No-code</b><span>Fast results in a black box no one will stake their name on.</span></div>
+      <div class="tension__c"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 15h4" opacity=".45"/></svg></div><b>Artifact-shaped</b><span>Organized by notebooks and jobs, so the business question disappears.</span></div>
+    </div>
+
+    <div class="posmap reveal" data-d="2">
+      <svg viewBox="0 0 900 470" role="img" aria-label="A 2x2 positioning map: code-first to no-code, against black box to glass box. Existing categories cluster at the extremes; Analance MLOps sits in the empty accessible and transparent quadrant.">
+        <line class="pm-grid" x1="450" y1="40" x2="450" y2="410"/>
+        <line class="pm-grid" x1="80" y1="225" x2="820" y2="225"/>
+        <line class="pm-axis" x1="80" y1="410" x2="820" y2="410"/>
+        <line class="pm-axis" x1="80" y1="40" x2="80" y2="410"/>
+        <text class="pm-axis-label" x="450" y="448" text-anchor="middle">Code-first  ⟶  No-code / accessible</text>
+        <text class="pm-axis-label" x="40" y="225" text-anchor="middle" transform="rotate(-90 40 225)">Black box  ⟶  Glass box / control</text>
+        <g class="pm-cat" tabindex="0" data-tip="<b>Notebooks &amp; scripts</b>, total control, if you can code every step yourself."><circle class="pm-dot" cx="175" cy="115" r="8"/><text class="pm-dot-lab" x="192" y="119">Notebooks &amp; scripts</text></g>
+        <g class="pm-cat" tabindex="0" data-tip="<b>Cloud ML (code-first)</b>, powerful and scalable, but engineers only."><circle class="pm-dot" cx="255" cy="195" r="8"/><text class="pm-dot-lab" x="272" y="199">Cloud ML (code-first)</text></g>
+        <g class="pm-cat" tabindex="0" data-tip="<b>Big-data workbenches</b>, heavy-duty, steep to learn, low transparency."><circle class="pm-dot" cx="380" cy="165" r="8"/><text class="pm-dot-lab" x="397" y="169">Big-data workbenches</text></g>
+        <g class="pm-cat" tabindex="0" data-tip="<b>Auto-ML suites</b>, fast results in a box no one can open."><circle class="pm-dot" cx="600" cy="350" r="8"/><text class="pm-dot-lab" x="560" y="372" text-anchor="end">Auto-ML suites</text></g>
+        <g class="pm-cat" tabindex="0" data-tip="<b>Visual ETL tools</b>, friendly for prep, but stop short of trusted models."><circle class="pm-dot" cx="520" cy="295" r="8"/><text class="pm-dot-lab" x="537" y="299">Visual ETL tools</text></g>
+        <g class="pm-cat pm-us" tabindex="0" data-tip="<b>Analance MLOps</b>, accessible AND inspectable: the empty middle."><circle class="pm-halo" cx="690" cy="115" r="42"/><circle cx="690" cy="115" r="11"/><text x="711" y="120">Analance MLOps</text></g>
+      </svg>
+      <div class="pmcap" id="pmCap" data-default="The accessible <b>and</b> glass-box quadrant everyone wanted was empty, so we built there. <span style=&quot;color:var(--slate-2)&quot;>Hover a category.</span>">The accessible <b>and</b> glass-box quadrant everyone wanted was empty, so we built there. <span style="color:var(--slate-2)">Hover a category.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RESEARCH ============ -->
+<section class="section section--tint" id="research">
+  <div class="wrap">
+    <div class="chapter-head reveal">
+      <span class="eyebrow">How I learned it</span>
+      <h2>Where projects lose time, trust, and momentum.</h2>
+      <p class="lede">I followed real projects through their messy middle, not a feature survey.</p>
+    </div>
+
+    <div class="methods reveal" data-d="1">
+      <div class="method"><b>23</b><em>Interviews</em><span>DS, analysts, ML engineers, sponsors</span></div>
+      <div class="method"><b>6</b><em>Contextual inquiry</em><span>Live projects, end to end</span></div>
+      <div class="method"><b>140</b><em>Survey responses</em><span>Pain points &amp; tool sprawl</span></div>
+      <div class="method"><b>7</b><em>Teardowns</em><span>Mapped on two axes</span></div>
+    </div>
+
+
+    <h3 class="reveal" style="margin-top:56px;margin-bottom:20px">Four people, one workspace</h3>
+    <div class="pswitch reveal" data-d="1">
+      <div class="pswitch__tabs">
+        <button class="pswitch__tab is-active"><small>Data scientist</small><b>Priya</b></button>
+        <button class="pswitch__tab"><small>Business analyst</small><b>Marcus</b></button>
+        <button class="pswitch__tab"><small>ML engineer</small><b>Dana</b></button>
+        <button class="pswitch__tab"><small>Sponsor</small><b>Sofia</b></button>
+      </div>
+      <div class="pswitch__card">
+        <div class="pswitch__av" id="psAv">P</div>
+        <div class="pswitch__txt"><h3><span id="psName">Priya</span> <span class="muted" style="font-size:.62em" id="psRole">Data scientist</span></h3><p id="psNeed">Wants total control and a model she can actually explain.</p></div>
+        <span class="pswitch__want" id="psWant">Glass box</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SYNTHESIS ============ -->
+<section class="section section--dark" id="synthesis">
+  <div class="wrap">
+    <div class="chapter-head reveal">
+      <span class="eyebrow on-dark">What it added up to</span>
+      <h2>Six findings, five principles.</h2>
+      <p class="lede">400+ observations, clustered and pressure-tested before any of it touched the design.</p>
+    </div>
+
+    <div class="fx reveal" data-d="1">
+      <div class="fx__list">
+        <button class="fx__row is-active"><span class="fn">F1</span><b>Framed as pipelines, not questions</b></button>
+        <button class="fx__row"><span class="fn">F2</span><b>Handoffs are where projects die</b></button>
+        <button class="fx__row"><span class="fn">F3</span><b>Trust comes from transparency</b></button>
+        <button class="fx__row"><span class="fn">F4</span><b>Start from data you can see</b></button>
+        <button class="fx__row"><span class="fn">F5</span><b>Ops becomes an emergency</b></button>
+        <button class="fx__row"><span class="fn">F6</span><b>Skill altitude shifts by the minute</b></button>
+      </div>
+      <div class="fx__detail">
+        <div class="big" id="fxBig">F1</div>
+        <h3 id="fxH">Framed as pipelines, not questions</h3>
+        <p id="fxP">The organizing unit was technical, so sponsors disengaged and scope drifted.</p>
+        <div class="fx__meta"><span class="fx__tag stat" id="fxStat">21 / 23 cited</span><span class="fx__tag link" id="fxLink">→ Principle 1</span></div>
+      </div>
+    </div>
+
+    <h3 class="reveal" style="margin-top:60px;margin-bottom:18px">From findings to principles</h3>
+    <div class="pcards reveal" data-d="1">
+      <div class="pcard"><span class="pn">P1</span><b>Outcome over artifact</b><span>The challenge is the home.</span><em>from F1</em></div>
+      <div class="pcard"><span class="pn">P2</span><b>One path, many altitudes</b><span>Visual by default, code on demand.</span><em>from F6</em></div>
+      <div class="pcard"><span class="pn">P3</span><b>Glass box</b><span>Every step inspectable, reversible.</span><em>from F3</em></div>
+      <div class="pcard"><span class="pn">P4</span><b>No handoff cliffs</b><span>Analyze, build, operate as one.</span><em>from F2 · F5</em></div>
+      <div class="pcard"><span class="pn">P5</span><b>Guided, not gated</b><span>Suggest the next step, never block.</span><em>from F4</em></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DESIGN ============ -->
+<section class="section" id="design">
+  <div class="wrap">
+    <div class="chapter-head reveal">
+      <span class="eyebrow">The design</span>
+      <h2>One workspace, shaped like the journey itself.</h2>
+      <p class="lede">The structural move was to make the <em>Business Challenge</em> the home for a project, a plain-language brief wrapped around three guided tracks: Analyze, Build, Operate. Below is a <em>live, clickable prototype</em> of the result: drive the sidebar, open panels, switch tabs. The note above the app traces each module back to the finding and decision behind it.</p>
+    </div>
+
+    <div class="reveal" data-d="1">
+      <!-- annotation strip (updates with the active module) -->
+      <div class="proto-note" id="protoNote">
+        <div class="proto-note__ptag" id="pnTag">Principle 1 · Outcome over artifact</div>
+        <h3 id="pnH3">A project is a business challenge, not a folder of files.</h3>
+        <div class="proto-note__insights">
+          <div class="insight"><span class="k">Finding</span><span class="v mut" id="pnFind">F1, work was organized around pipelines, so sponsors disengaged.</span></div>
+          <div class="insight"><span class="k">Decision</span><span class="v" id="pnDec">Make the challenge the front door; show intent and status before any tooling.</span></div>
+          <div class="insight"><span class="k">Serves</span><span class="v mut" id="pnServes">Sofia lands here and gets it; everyone else uses it as a launchpad.</span></div>
+        </div>
+      </div>
+
+      <!-- live prototype -->
+      <figure class="screen screen--live">
+        <div class="screen__bar">
+          <div class="screen__dots"><i></i><i></i><i></i></div>
+          <div class="screen__url"><span id="tpUrl">analance.app / business-challenge / sample-project / overview</span></div>
+          <span class="proto-hint"><b></b>Live prototype, click around</span>
+        </div>
+        <div class="tp" id="tp">
+          <aside class="tp__side">
+            <div class="tp__brandmark"></div>
+            <button class="tp__navitem is-active" data-tpgo="overview"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.4"/><rect x="14" y="3" width="7" height="7" rx="1.4"/><rect x="3" y="14" width="7" height="7" rx="1.4"/><rect x="14" y="14" width="7" height="7" rx="1.4"/></svg>Overview</button>
+            <button class="tp__navitem" data-tpgo="flows"><svg viewBox="0 0 24 24"><circle cx="5" cy="6" r="2.3"/><circle cx="5" cy="18" r="2.3"/><circle cx="19" cy="12" r="2.3"/><path d="M7.1 6.9l9.8 4M7.1 17.1l9.8-4"/></svg>Flows</button>
+            <button class="tp__navitem" data-tpgo="data"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/></svg>Datasource</button>
+            <button class="tp__navitem" data-tpgo="models"><svg viewBox="0 0 24 24"><path d="M12 2.5l8.5 4.8v9.4L12 21.5 3.5 16.7V7.3z"/><path d="M12 2.5v19M3.5 7.3l8.5 4.8 8.5-4.8"/></svg>Models</button>
+            <button class="tp__navitem" data-tpgo="deploy"><svg viewBox="0 0 24 24"><path d="M5.5 14.5c-1.2 1.6-1.3 4.5-1.3 4.5s2.9-.1 4.5-1.3M9 15l-3-3a8.5 8.5 0 0112-5 8.5 8.5 0 01-5 12l-3-3z"/><circle cx="14.5" cy="9.5" r="1.5"/></svg>Deployments</button>
+          </aside>
+          <div class="tp__main">
+            <div class="tp__top">
+              <span class="tp__crumbpill">&#8249; My folders</span>
+              <span class="tp__crumb-sep">/</span> Business Challenge
+              <span class="tp__crumb-sep">/</span> Sample project
+              <span class="tp__crumb-sep">/</span> <span class="tp__crumb-cur" id="tpCur">Overview</span>
+              <span class="tp__topicons"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20l4.5-1L19 8.5 15.5 5 5 15.5z"/></svg><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13"/></svg><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg></span>
+            </div>
+            <div class="tp__body">
+
+              <!-- ===== OVERVIEW ===== -->
+              <section class="tp-module is-active" data-mod="overview">
+                <div class="tp-ovhead">
+                  <div class="av"></div>
+                  <div><h4>Sample project</h4><p>Forecast store-level profit on the Superstore dataset, and ship a model the operations team can monitor in production.</p></div>
+                </div>
+                <div class="tp-cards">
+                  <div class="tp-card">
+                    <div class="tp-card__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="6.2"/><path d="M14.7 14.7L21 21"/><path d="M8.3 8l-1.8 2 1.8 2M11.7 8l1.8 2-1.8 2"/></svg></div>
+                    <h5>Analyze Data</h5>
+                    <a data-tpgo="data">Data ingestion</a>
+                    <a data-tpgo="data">Exploration &amp; validation</a>
+                    <a data-tpgo="data">Data wrangling (cleaning)</a>
+                    <a data-tpgo="data">Data splitting</a>
+                    <a data-tpgo="data">Feature analysis</a>
+                  </div>
+                  <div class="tp-card">
+                    <div class="tp-card__ic"><svg viewBox="0 0 24 24"><path d="M12 2.5l8.5 4.8v9.4L12 21.5 3.5 16.7V7.3z"/><path d="M12 2.5v19M3.5 7.3l8.5 4.8 8.5-4.8"/></svg></div>
+                    <h5>Build models</h5>
+                    <a data-tpgo="models">Model training &amp; tuning</a>
+                    <a data-tpgo="models">Model evaluation</a>
+                    <a data-tpgo="models">Model packaging</a>
+                    <a data-tpgo="models">Feature handling</a>
+                    <a data-tpgo="models">Explainability</a>
+                  </div>
+                  <div class="tp-card">
+                    <div class="tp-card__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="9" r="3"/><circle cx="16.5" cy="16" r="2.6"/><path d="M9 3.4v2.2M9 12.4v2.2M3.4 9h2.2M12.4 9h2.2M5 5l1.5 1.5M11.5 11.5L13 13"/></svg></div>
+                    <h5>Operations</h5>
+                    <a data-tpgo="deploy">Reproducibility &amp; validation</a>
+                    <a data-tpgo="deploy">Model metadata</a>
+                    <a data-tpgo="deploy">Monitoring &amp; alerting</a>
+                    <a data-tpgo="deploy">Model service catalog</a>
+                    <a data-tpgo="deploy">Reports</a>
+                  </div>
+                </div>
+                <div class="tp-log"><b>Activity log</b><p>You created the business challenge &ldquo;Sample project&rdquo; a few seconds ago.</p></div>
+              </section>
+
+              <!-- ===== FLOWS ===== -->
+              <section class="tp-module" data-mod="flows">
+                <div class="tp-scrim" data-tpclose></div>
+                <div class="tp-toolbar">
+                  <input class="tp-search" placeholder="Search" />
+                  <span class="tp-spacer"></span>
+                  <button class="tp-act" data-tpgo="data"><span class="pl">+</span> Add datasource</button>
+                  <button class="tp-act" data-tpopen="tasks"><span class="pl">+</span> Add experiment</button>
+                </div>
+                <div class="tp-canvas">
+                  <svg class="edges" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path d="M16 50 C30 50 30 30 42 30" fill="none" stroke="#c6d0e2" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                    <path d="M16 50 C30 50 30 70 42 70" fill="none" stroke="#c6d0e2" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                    <path d="M42 30 C56 30 58 30 72 30" fill="none" stroke="#c6d0e2" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                    <path d="M42 70 C56 70 58 70 72 70" fill="none" stroke="#c6d0e2" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                  </svg>
+                  <button class="tp-node" data-tpselect data-hint="Superstore_dataset · open as table or code" style="left:16%;top:50%"><span class="box"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3.5l7 4-7 4-7-4z"/><path d="M5 7.5v6l7 4 7-4v-6"/></svg></span>Superstore_dataset</button>
+                  <button class="tp-node" data-tpselect data-hint="Prepare recipe · edit visually or in code" style="left:42%;top:30%"><span class="circ"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M5 19L15 9"/><path d="M16 4l1 2 2 1-2 1-1 2-1-2-2-1 2-1z"/></svg></span>Prepare</button>
+                  <button class="tp-node" data-tpselect data-hint="Prepare recipe · edit visually or in code" style="left:42%;top:70%"><span class="circ"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M5 19L15 9"/><path d="M16 4l1 2 2 1-2 1-1 2-1-2-2-1 2-1z"/></svg></span>Prepare</button>
+                  <button class="tp-node" data-tpselect data-hint="Superstore_dataset_prepared · ready for modeling" style="left:72%;top:30%"><span class="box out"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3.5l7 4-7 4-7-4z"/><path d="M5 7.5v6l7 4 7-4v-6"/></svg></span>Superstore_dataset_prepared</button>
+                  <button class="tp-node" data-tpselect data-hint="Not built yet, run the recipe to materialize" style="left:72%;top:70%"><span class="box dash"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3.5l7 4-7 4-7-4z"/><path d="M5 7.5v6l7 4 7-4v-6"/></svg></span>Superstore_dataset_prepared_1</button>
+                  <div class="tp-nodehint" id="tpNodeHint"></div>
+                </div>
+                <p class="tp-note" style="margin-top:12px">Datasets are blue, transform recipes are amber. Click any node to select it, every node opens to a visual editor or full code.</p>
+
+                <div class="tp-panel" data-panel="tasks">
+                  <div class="tp-panel__head"><h4>Modeling tasks</h4><button class="tp-x" data-tpclose>&times;</button></div>
+                  <div class="tp-panel__body">
+                    <div class="tp-tabs" style="margin-bottom:6px">
+                      <button class="tp-tab is-active" data-tptab="tk:vml">Visual ML</button>
+                      <button class="tp-tab" data-tptab="tk:tf">Time forecasting</button>
+                      <button class="tp-tab" data-tptab="tk:va">Visual analysis</button>
+                      <button class="tp-tab" data-tptab="tk:ot">Others</button>
+                    </div>
+                    <div data-pane="tk:vml" class="tp-pane is-open">
+                      <button class="tp-mrow" data-tpgo="models"><span class="hex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2.3l8.4 4.85v9.7L12 21.7 3.6 16.85v-9.7z"/></svg></span><div><b>AutoML, Regression</b><span>Train and rank several model families on your target, hands-free.</span></div></button>
+                      <button class="tp-mrow" data-tpgo="models"><span class="hex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2.3l8.4 4.85v9.7L12 21.7 3.6 16.85v-9.7z"/></svg></span><div><b>RandomForest Regressor</b><span>Robust tree ensemble, strong default for tabular profit prediction.</span></div></button>
+                      <button class="tp-mrow" data-tpgo="models"><span class="hex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2.3l8.4 4.85v9.7L12 21.7 3.6 16.85v-9.7z"/></svg></span><div><b>Generalized Additive Model</b><span>Smooth, inherently interpretable additive baseline.</span></div></button>
+                      <button class="tp-mrow" data-tpgo="models"><span class="hex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2.3l8.4 4.85v9.7L12 21.7 3.6 16.85v-9.7z"/></svg></span><div><b>Ridge / Lasso Regression</b><span>Regularized linear baseline you can read off coefficients.</span></div></button>
+                    </div>
+                    <div data-pane="tk:tf" class="tp-pane"><p class="tp-note">Forecast a metric over time with seasonality and holiday effects. Pick a date column and a horizon to begin.</p></div>
+                    <div data-pane="tk:va" class="tp-pane"><p class="tp-note">No-code visual analyses, clustering, anomaly detection, and segmentation, rendered as charts you can act on.</p></div>
+                    <div data-pane="tk:ot" class="tp-pane"><p class="tp-note">Bring your own: a custom code experiment with full access to the prepared dataset.</p></div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ===== DATASOURCE ===== -->
+              <section class="tp-module" data-mod="data">
+                <div class="tp-scrim" data-tpclose></div>
+                <div class="tp-title">Superstore</div>
+                <div class="tp-meta">Columns: 24 &nbsp;·&nbsp; Metrics: 6</div>
+                <div class="tp-toolbar" style="margin-bottom:12px">
+                  <button class="tp-tab" data-tptab="ds:prev">Preview</button>
+                  <button class="tp-tab is-active" data-tptab="ds:data">Data</button>
+                  <button class="tp-tab" data-tptab="ds:stats">Stats</button>
+                  <button class="tp-tab" data-tptab="ds:eda">Auto EDA</button>
+                  <button class="tp-tab" data-tptab="ds:feat">Feature list</button>
+                  <span class="tp-spacer"></span>
+                  <button class="tp-act" data-tpopen="analysis">Data analysis &#8250;</button>
+                </div>
+                <div data-pane="ds:data" class="tp-pane is-open">
+                  <div class="tp-tablewrap">
+                    <table class="tp-table"><thead><tr><th>Branch</th><th>Category</th><th>City</th><th>Country</th><th>Customer</th><th>Days to ship</th><th>Discount</th><th>Profit</th></tr></thead><tbody><tr><td>Allentown Branch</td><td>Furniture</td><td>Allentown</td><td>United States</td><td>Caroline Jumper</td><td>6</td><td>0.2</td><td>3</td></tr><tr><td>Anaheim Branch</td><td>Office Supplies</td><td>Anaheim</td><td>United States</td><td>Dean Katz</td><td>3</td><td>0</td><td>311</td></tr><tr><td>Arlington Branch</td><td>Office Supplies</td><td>Arlington</td><td>United States</td><td>Cassandra Brandow</td><td>6</td><td>0.2</td><td>125</td></tr><tr><td>Arlington Branch</td><td>Office Supplies</td><td>Arlington</td><td>United States</td><td>Dan Campbell</td><td>1</td><td>0.2</td><td>1</td></tr><tr><td>Auburn Branch</td><td>Office Supplies</td><td>Auburn</td><td>United States</td><td>Raymond Buch</td><td>3</td><td>0</td><td>8</td></tr><tr><td>Auburn Branch</td><td>Office Supplies</td><td>Auburn</td><td>United States</td><td>Raymond Buch</td><td>3</td><td>0</td><td>71</td></tr><tr><td>Austin Branch</td><td>Office Supplies</td><td>Austin</td><td>United States</td><td>Jay Fein</td><td>6</td><td>0.2</td><td>6</td></tr><tr><td>Bellevue Branch</td><td>Furniture</td><td>Bellevue</td><td>United States</td><td>Ruben Dartt</td><td>6</td><td>0</td><td>8</td></tr><tr><td>Brentwood Branch</td><td>Technology</td><td>Brentwood</td><td>United States</td><td>Alan Hwang</td><td>6</td><td>0</td><td>35</td></tr><tr><td>Chester Branch</td><td>Furniture</td><td>Chester</td><td>United States</td><td>Anna Andreadi</td><td>6</td><td>0.3</td><td>0</td></tr></tbody></table>
+                  </div>
+                </div>
+                <div data-pane="ds:prev" class="tp-pane"><p class="tp-note">A read-only snapshot of the first 100 rows, exactly as the file was ingested, before any recipe runs.</p></div>
+                <div data-pane="ds:stats" class="tp-pane">
+                  <div class="tp-metrics"><div class="tp-metric"><b>9,994</b><span>rows</span></div><div class="tp-metric"><b>24</b><span>columns</span></div><div class="tp-metric"><b>0.3%</b><span>missing values</span></div></div>
+                </div>
+                <div data-pane="ds:eda" class="tp-pane"><p class="tp-note">Auto-generated distributions, correlations and outliers for every column, so you can see the shape of the data before modeling it.</p></div>
+                <div data-pane="ds:feat" class="tp-pane"><p class="tp-note">Profit <span class="tp-badge">target</span> &nbsp; Discount &nbsp; Quantity &nbsp; Category &nbsp; Sub-Category &nbsp; Region &nbsp; Ship days &nbsp; Distributor &nbsp; Segment</p></div>
+
+                <div class="tp-panel" data-panel="analysis">
+                  <div class="tp-panel__head"><h4>Data analysis</h4><button class="tp-act" style="margin-left:auto;margin-right:6px">Custom experiments</button><button class="tp-x" data-tpclose>&times;</button></div>
+                  <div class="tp-panel__body">
+                    <div class="tp-tabs" style="margin-bottom:8px"><button class="tp-tab is-active" data-tptab="an:ve">Visual experiments</button><button class="tp-tab" data-tptab="an:pr">Process</button><button class="tp-tab" data-tptab="an:co">Code</button></div>
+                    <div class="tp-note" id="tpAnNote" style="margin-bottom:6px;color:var(--tp-blue)"></div>
+                    <div data-pane="an:ve" class="tp-pane is-open">
+                      <div class="tp-anrow" data-tpan="Descriptive analysis"><b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3h6M10 3v6.2l-4.7 8.4A1.6 1.6 0 006.7 20h10.6a1.6 1.6 0 001.4-2.4L14 9.2V3"/><path d="M7.7 14h8.6"/></svg></span>Descriptive analysis</b><p>Summarize the current state, mean, median, spread. What happened?</p></div>
+                      <div class="tp-anrow" data-tpan="Diagnostic analysis"><b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3h6M10 3v6.2l-4.7 8.4A1.6 1.6 0 006.7 20h10.6a1.6 1.6 0 001.4-2.4L14 9.2V3"/><path d="M7.7 14h8.6"/></svg></span>Diagnostic analysis</b><p>Dig into root causes of events or behaviors. Why did it happen?</p></div>
+                      <div class="tp-anrow" data-tpan="Exploratory analysis"><b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3h6M10 3v6.2l-4.7 8.4A1.6 1.6 0 006.7 20h10.6a1.6 1.6 0 001.4-2.4L14 9.2V3"/><path d="M7.7 14h8.6"/></svg></span>Exploratory analysis</b><p>Surface patterns, relationships and anomalies without a fixed question.</p></div>
+                      <div class="tp-anrow" data-tpan="Predictive analysis"><b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3h6M10 3v6.2l-4.7 8.4A1.6 1.6 0 006.7 20h10.6a1.6 1.6 0 001.4-2.4L14 9.2V3"/><path d="M7.7 14h8.6"/></svg></span>Predictive analysis</b><p>Forecast future outcomes from current and historical data.</p></div>
+                      <div class="tp-anrow" data-tpan="Causal analysis"><b><span class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3h6M10 3v6.2l-4.7 8.4A1.6 1.6 0 006.7 20h10.6a1.6 1.6 0 001.4-2.4L14 9.2V3"/><path d="M7.7 14h8.6"/></svg></span>Causal analysis</b><p>Understand cause and effect, what change will move the outcome?</p></div>
+                    </div>
+                    <div data-pane="an:pr" class="tp-pane"><p class="tp-note">A guided, step-by-step recipe for the analysis you picked, each step inspectable and re-runnable.</p></div>
+                    <div data-pane="an:co" class="tp-pane"><p class="tp-note">The same analysis as editable Python. The visual and code views stay in sync.</p></div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ===== MODELS ===== -->
+              <section class="tp-module" data-mod="models">
+                <div class="tp-scrim" data-tpclose></div>
+                <div class="tp-toolbar" style="margin-bottom:12px">
+                  <button class="tp-tab is-active" data-tptab="md:inv">Inventory</button>
+                  <button class="tp-tab" data-tptab="md:ins">Insights</button>
+                  <button class="tp-tab" data-tptab="md:cmp">Comparison</button>
+                  <button class="tp-tab" data-tptab="md:dia">Diagnostics</button>
+                  <button class="tp-tab" data-tptab="md:reg">Registry</button>
+                  <button class="tp-tab" data-tptab="md:pkg">Package</button>
+                  <span class="tp-spacer"></span>
+                  <button class="tp-act"><span class="pl">+</span> Add model</button>
+                </div>
+                <div data-pane="md:inv" class="tp-pane is-open">
+                  <div class="tp-tablewrap">
+                    <table class="tp-table tp-rows"><thead><tr><th>Model</th><th>Description</th><th>Validation (RMSE)</th></tr></thead><tbody>
+                      <tr data-tpopen="model"><td class="tp-link">RandomForest Regressor</td><td>Tree ensemble, strong tabular default</td><td>184.0637</td></tr>
+                      <tr data-tpopen="model"><td class="tp-link">Generalized Additive Model</td><td>Smooth, interpretable additive baseline</td><td>127.4191</td></tr>
+                      <tr data-tpopen="model"><td class="tp-link">Ridge Regressor</td><td>Regularized linear baseline</td><td>101.7099</td></tr>
+                    </tbody></table>
+                  </div>
+                  <p class="tp-note" style="margin-top:10px">Click a model to evaluate it, understand <em>why</em> it predicts what it does, or turn it into a prediction app.</p>
+                </div>
+                <div data-pane="md:ins" class="tp-pane"><p class="tp-note">Leaderboard view, the Ridge baseline currently leads on validation RMSE (101.71), with the additive model close behind.</p></div>
+                <div data-pane="md:cmp" class="tp-pane"><div class="tp-bars"><div class="tp-bar"><span class="lab">Ridge</span><span class="track"><span class="fill" style="width:55%"></span></span><span class="val">101.7</span></div><div class="tp-bar"><span class="lab">GAM</span><span class="track"><span class="fill" style="width:69%"></span></span><span class="val">127.4</span></div><div class="tp-bar"><span class="lab">RandomForest</span><span class="track"><span class="fill" style="width:100%"></span></span><span class="val">184.1</span></div></div><p class="tp-note" style="margin-top:12px">Lower RMSE is better. The simple, transparent models hold their own, which made the trust conversation easy.</p></div>
+                <div data-pane="md:dia" class="tp-pane"><p class="tp-note">Residual plots, calibration and per-segment error, so a strong average score can not hide a weak slice.</p></div>
+                <div data-pane="md:reg" class="tp-pane"><p class="tp-note">Versioned registry: <b>v3</b> <span class="tp-badge">production</span> &nbsp; <b>v2</b> <span class="tp-badge warn">staging</span> &nbsp; <b>v1</b> archived.</p></div>
+                <div data-pane="md:pkg" class="tp-pane"><p class="tp-note">Export the chosen model as a REST endpoint, a Python package, or a container image, one click, lineage attached.</p></div>
+
+                <div class="tp-panel wide" data-panel="model">
+                  <div class="tp-panel__head"><h4>Ridge Regressor</h4><button class="tp-x" data-tpclose>&times;</button></div>
+                  <div class="tp-panel__body">
+                    <div class="tp-toptabs" style="margin-bottom:14px">
+                      <button class="tp-toptab" data-tptab="mt:eval">Evaluate</button>
+                      <button class="tp-toptab is-active" data-tptab="mt:und">Understand</button>
+                      <button class="tp-toptab" data-tptab="mt:pred">Predict</button>
+                      <button class="tp-toptab" data-tptab="mt:app">Build app</button>
+                    </div>
+
+                    <div data-pane="mt:eval" class="tp-pane">
+                      <div class="tp-metrics"><div class="tp-metric"><b>0.71</b><span>R&#178;</span></div><div class="tp-metric"><b>101.7</b><span>RMSE</span></div><div class="tp-metric"><b>62.4</b><span>MAE</span></div></div>
+                      <p class="tp-note" style="margin-top:12px">Evaluated on a held-out split with 5-fold cross-validation.</p>
+                    </div>
+
+                    <div data-pane="mt:und" class="tp-pane is-open">
+                      <div class="tp-subtabs">
+                        <button class="tp-subtab is-active" data-tptab="su:fi">Feature impact</button>
+                        <button class="tp-subtab" data-tptab="su:fe">Feature effects</button>
+                        <button class="tp-subtab" data-tptab="su:ex">Explanation</button>
+                        <button class="tp-subtab" data-tptab="su:dl">Downloads</button>
+                      </div>
+                      <div data-pane="su:fi" class="tp-pane is-open"><div class="tp-bars"><div class="tp-bar"><span class="lab">Discount</span><span class="track"><span class="fill" style="width:100%"></span></span><span class="val">0.34</span></div><div class="tp-bar"><span class="lab">Quantity</span><span class="track"><span class="fill" style="width:78%"></span></span><span class="val">0.27</span></div><div class="tp-bar"><span class="lab">Sub-Category</span><span class="track"><span class="fill" style="width:61%"></span></span><span class="val">0.21</span></div><div class="tp-bar"><span class="lab">Region</span><span class="track"><span class="fill" style="width:47%"></span></span><span class="val">0.16</span></div><div class="tp-bar"><span class="lab">Ship days</span><span class="track"><span class="fill" style="width:33%"></span></span><span class="val">0.11</span></div><div class="tp-bar"><span class="lab">Distributor</span><span class="track"><span class="fill" style="width:21%"></span></span><span class="val">0.07</span></div></div><p class="tp-note" style="margin-top:12px">Discount and quantity drive most of the predicted profit, which matched what the analysts already believed, and that is exactly why they trusted it.</p></div>
+                      <div data-pane="su:fe" class="tp-pane">
+                        <svg viewBox="0 0 320 130" style="width:100%;max-width:360px;height:auto"><polyline points="10,110 60,86 110,70 160,52 210,60 260,40 300,24" fill="none" stroke="var(--tp-blue)" stroke-width="2"/><line x1="10" y1="115" x2="310" y2="115" stroke="#dfe5ef"/><text x="10" y="128" font-size="9" fill="#8a93a3">low quantity</text><text x="300" y="128" font-size="9" fill="#8a93a3" text-anchor="end">high quantity</text></svg>
+                        <p class="tp-note" style="margin-top:8px">How predicted profit responds to quantity, holding everything else fixed.</p>
+                      </div>
+                      <div data-pane="su:ex" class="tp-pane"><p class="tp-note">For this row, the model predicts profit <b>+$214</b>: a high quantity (+$160) and low discount (+$70) push it up, while the furniture sub-category pulls it down (&minus;$16).</p></div>
+                      <div data-pane="su:dl" class="tp-pane"><p class="tp-note">Download: feature-impact report (PDF) &nbsp;·&nbsp; SHAP values (CSV) &nbsp;·&nbsp; model card (MD).</p></div>
+                    </div>
+
+                    <div data-pane="mt:pred" class="tp-pane">
+                      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end">
+                        <label style="font-size:12px;color:var(--tp-sub)">Discount<br><input id="tpInDisc" type="number" step="0.05" value="0.10" style="width:90px;margin-top:5px;padding:7px;border:1px solid var(--tp-line);border-radius:7px"></label>
+                        <label style="font-size:12px;color:var(--tp-sub)">Quantity<br><input id="tpInQty" type="number" step="1" value="5" style="width:90px;margin-top:5px;padding:7px;border:1px solid var(--tp-line);border-radius:7px"></label>
+                        <button class="tp-act" data-tppredict style="border:1px solid var(--tp-blue);padding:8px 14px">Predict profit</button>
+                      </div>
+                      <p style="margin-top:16px;font-size:13px;color:var(--tp-sub)">Predicted profit: <b id="tpPredOut" style="font-size:20px;color:var(--tp-ink)">$166.00</b></p>
+                    </div>
+
+                    <div data-pane="mt:app" class="tp-pane">
+                      <div style="border:1px solid var(--tp-line);border-radius:12px;padding:18px"><b style="font-size:14px">Profit Estimator</b> <span class="tp-badge">published</span><p class="tp-note" style="margin-top:8px">A no-code web app wrapping this model, shareable with the business at <span style="color:var(--tp-blue)">analance.app/apps/profit-estimator</span>.</p></div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ===== DEPLOYMENTS ===== -->
+              <section class="tp-module" data-mod="deploy">
+                <div class="tp-toolbar" style="margin-bottom:12px">
+                  <button class="tp-tab is-active" data-tptab="dp:dep">Deployments</button>
+                  <button class="tp-tab" data-tptab="dp:env">Environments</button>
+                  <button class="tp-tab" data-tptab="dp:job">Jobs</button>
+                  <button class="tp-tab" data-tptab="dp:aut">Automations</button>
+                  <span class="tp-spacer"></span>
+                  <button class="tp-act"><span class="pl">+</span> Add deployment</button>
+                </div>
+                <div data-pane="dp:dep" class="tp-pane is-open">
+                  <div class="tp-tablewrap"><table class="tp-table"><thead><tr><th>Deployment</th><th>Description</th><th>Validation</th></tr></thead><tbody>
+                    <tr><td class="tp-link">Deployment_Env_1</td><td>&mdash;</td><td>184.0637</td></tr>
+                    <tr><td class="tp-link">Deployment_Env_2</td><td>&mdash;</td><td>127.4191</td></tr>
+                    <tr><td class="tp-link">Deployment_Env_3</td><td>Production scoring service</td><td>101.7099</td></tr>
+                  </tbody></table></div>
+                </div>
+                <div data-pane="dp:env" class="tp-pane"><div class="tp-tablewrap"><table class="tp-table"><thead><tr><th>Environment</th><th>Status</th><th>Model</th></tr></thead><tbody>
+                    <tr><td>Production</td><td><span class="tp-badge">live</span></td><td>Ridge v3</td></tr>
+                    <tr><td>Staging</td><td><span class="tp-badge">live</span></td><td>GAM v2</td></tr>
+                    <tr><td>Sandbox</td><td><span class="tp-badge warn">idle</span></td><td>&mdash;</td></tr>
+                </tbody></table></div></div>
+                <div data-pane="dp:job" class="tp-pane"><div class="tp-tablewrap"><table class="tp-table"><thead><tr><th>Job</th><th>Schedule</th><th>Status</th></tr></thead><tbody>
+                    <tr><td>Nightly scoring</td><td>02:00 daily</td><td><span class="tp-badge">success</span></td></tr>
+                    <tr><td>Weekly retrain</td><td>Sun 04:00</td><td><span class="tp-badge warn">running</span></td></tr>
+                    <tr><td>Drift backfill</td><td>on demand</td><td>queued</td></tr>
+                </tbody></table></div></div>
+                <div data-pane="dp:aut" class="tp-pane"><p class="tp-note">Rule: <b>if data drift &gt; 0.2 for 3 days → trigger retrain &amp; notify #ml-ops</b> <span class="tp-badge">enabled</span>. Monitoring lives here, not in a separate tool, so it is part of the path, not a 2am surprise.</p></div>
+              </section>
+
+            </div>
+          </div>
+        </div>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============ REFLECTION ============ -->
+<section class="section section--tint" id="reflection">
+  <div class="wrap">
+    <div class="chapter-head reveal">
+      <span class="eyebrow">Reflection</span>
+      <h2>What held up, and what I'd push on next.</h2>
+    </div>
+    <div class="reflect reveal" data-d="1">
+      <div>
+        <h3>What worked</h3>
+        <ul>
+          <li><span><b>Business Challenges as the home</b>, beat any single feature.</span></li>
+          <li><span><b>Visual-by-default + a code escape hatch</b>, dissolved the two-audience tension.</span></li>
+          <li><span><b>Models and explainability together</b>, made glass box tangible.</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3>What I'd revisit</h3>
+        <ul>
+          <li class="next"><span><b>Guardrails</b> on the analysis suggestions.</span></li>
+          <li class="next"><span><b>Gentler first-run</b> for the node-graph.</span></li>
+          <li class="next"><span><b>Next:</b> collaboration, governance, sponsor mobile view.</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="foot">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow on-dark">End of case study</span>
+      <h2 style="margin-top:18px">From a relay nobody owned to a path a whole team can walk.</h2>
+    </div>
+    <div class="foot__meta">
+      <b>Analance MLOps</b>, data science platform<br>
+      Role&nbsp;&nbsp;Lead Product Designer<br>
+      Years&nbsp;2024 – 2025<br>
+      Work&nbsp;&nbsp;Research · IA · Interaction · UI
+    </div>
+    <p class="foot__note">This is a portfolio case study. The product name, partner program, and quantitative figures are an illustrative narrative constructed to demonstrate process and reasoning; the interface screens are real designs from the project.</p>
+  </div>
+</footer>
+
+
+</body>
+</html>
+
+
+<a href="../index.html#work" aria-label="Back to portfolio" style="position:fixed;top:14px;left:14px;z-index:2147483647;font:600 13px/1 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;color:#fff;background:rgba(15,14,18,.82);border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);text-decoration:none;box-shadow:0 4px 18px rgba(0,0,0,.25)">← Portfolio</a>
+<script>(function(){var _a=document.addEventListener.bind(document);document.addEventListener=function(t,cb,o){if(t==="DOMContentLoaded"&&document.readyState!=="loading"){setTimeout(function(){try{cb(new Event("DOMContentLoaded"))}catch(e){console.error(e)}},0);return;}return _a(t,cb,o);};})();</script>
+<script>
+
+
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- smooth scroll for pipeline nodes ---- */
+  document.querySelectorAll('.pnode').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var el=document.getElementById(btn.dataset.go);
+      if(el) el.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
+    });
+  });
+
+  /* ---- active section in pipeline nav ---- */
+  var sections=['intro','problem','research','synthesis','design','reflection'];
+  var nodes={};
+  document.querySelectorAll('.pnode').forEach(function(n){nodes[n.dataset.go]=n;});
+  var navObs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        Object.values(nodes).forEach(function(n){n.classList.remove('is-active');});
+        var active=nodes[e.target.id];
+        if(active){
+          active.classList.add('is-active');
+          var cur=document.getElementById('railCurrent');
+          if(cur)cur.textContent=active.dataset.name;
+        }
+      }
+    });
+  },{rootMargin:'-45% 0px -50% 0px'});
+  sections.forEach(function(id){var el=document.getElementById(id);if(el)navObs.observe(el);});
+
+  /* ---- reveal on scroll ---- */
+  if(reduce){
+    document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('in');});
+  }else{
+    var revObs=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');revObs.unobserve(e.target);}});
+    },{threshold:.12});
+    document.querySelectorAll('.reveal').forEach(function(el){revObs.observe(el);});
+  }
+
+  /* ---- count up ---- */
+  function animateCount(el){
+    var target=parseFloat(el.dataset.count);
+    var decimals=(el.dataset.count.indexOf('.')>-1)?1:0;
+    var unit=el.querySelector('.u')?el.querySelector('.u').outerHTML:'';
+    if(reduce){el.innerHTML=target.toFixed(decimals)+unit;return;}
+    var start=null,dur=1400;
+    function step(ts){
+      if(!start)start=ts;
+      var p=Math.min((ts-start)/dur,1);
+      var eased=1-Math.pow(1-p,3);
+      el.innerHTML=(target*eased).toFixed(decimals)+unit;
+      if(p<1)requestAnimationFrame(step);
+      else el.innerHTML=target.toFixed(decimals)+unit;
+    }
+    requestAnimationFrame(step);
+  }
+  var countObs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){if(e.isIntersecting){animateCount(e.target);countObs.unobserve(e.target);}});
+  },{threshold:.6});
+  document.querySelectorAll('[data-count]').forEach(function(el){countObs.observe(el);});
+
+  /* ---- module tabs ---- */
+  var tabs=document.querySelectorAll('.tab');
+  tabs.forEach(function(tab){
+    tab.addEventListener('click',function(){
+      tabs.forEach(function(t){t.setAttribute('aria-selected','false');});
+      tab.setAttribute('aria-selected','true');
+      document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('is-open');});
+      var panel=document.getElementById(tab.dataset.tab);
+      if(panel)panel.classList.add('is-open');
+    });
+  });
+
+  /* ===== live prototype ===== */
+  var tp=document.getElementById('tp');
+  if(tp){
+    var ANN={
+      overview:{t:'Principle 1 · Outcome over artifact',h:'A project is a business challenge, not a folder of files.',f:'F1 — work was organized around pipelines, so sponsors disengaged.',d:'Make the challenge the front door; show intent and status before any tooling.',s:'Sofia lands here and gets it; everyone else uses it as a launchpad.'},
+      flows:{t:'Principle 2 · One path, many altitudes',h:'Flows: a visual lattice anyone can read, with code one click in.',f:'F6 — the same person needs no-code and code within one hour.',d:'A visual graph is the shared surface; every node opens to code.',s:'Marcus builds the pipeline; Priya drops into code on the hard 10%.'},
+      data:{t:'Principle 5 · Guided, not gated',h:'Guided analysis that says here is what is worth looking at.',f:'F4 — guided exploration was the single most requested capability.',d:'Name analyses in outcome terms and explain when to reach for each.',s:'Marcus gets a map; Priya skips straight to custom experiments.'},
+      models:{t:'Principle 3 · Glass box, not black box',h:'Compare models on one metric, then understand why they work.',f:'F3 — trust comes from transparency, not the leaderboard.',d:'Pair every model with explainability in the same place, not a separate tool.',s:'Priya can defend the model; Sofia can see what is driving it.'},
+      deploy:{t:'Principle 4 · No handoff cliffs',h:'Operations sits on the same path, not in someone else\'s tool.',f:'F2 & F5 — handoffs lost context; operations was bolted on late.',d:'Keep deploy and monitor in-workspace, with lineage back to model and data.',s:'The relay becomes one continuous track with no dropped batons.'}
+    };
+    var CRUMB={overview:'Overview',flows:'Flows',data:'Datasource',models:'Model',deploy:'Deployments'};
+    var URLS={overview:'overview',flows:'flows',data:'datasource',models:'model',deploy:'deployments'};
+    function tset(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+    function setAnn(m){var a=ANN[m];if(!a)return;tset('pnTag',a.t);tset('pnH3',a.h);tset('pnFind',a.f);tset('pnDec',a.d);tset('pnServes',a.s);tset('tpCur',CRUMB[m]);var u=document.getElementById('tpUrl');if(u)u.textContent='analance.app / business-challenge / sample-project / '+URLS[m];}
+    function closePanels(){tp.querySelectorAll('.tp-panel').forEach(function(p){p.classList.remove('is-open');});tp.querySelectorAll('.tp-scrim').forEach(function(s){s.classList.remove('is-open');});}
+    function go(m){tp.querySelectorAll('.tp-module').forEach(function(x){x.classList.toggle('is-active',x.dataset.mod===m);});tp.querySelectorAll('.tp__navitem').forEach(function(x){x.classList.toggle('is-active',x.dataset.tpgo===m);});closePanels();setAnn(m);}
+    tp.addEventListener('click',function(ev){
+      var t=ev.target.closest('[data-tpgo],[data-tpopen],[data-tpclose],[data-tptab],[data-tpselect],[data-tppredict],[data-tpan]');
+      if(!t||!tp.contains(t))return;
+      if(t.hasAttribute('data-tpgo')&&t.getAttribute('data-tpgo')){go(t.getAttribute('data-tpgo'));return;}
+      if(t.hasAttribute('data-tpopen')){var id=t.getAttribute('data-tpopen');var p=tp.querySelector('.tp-panel[data-panel="'+id+'"]');if(p){p.classList.add('is-open');var sc=p.parentElement.querySelector('.tp-scrim');if(sc)sc.classList.add('is-open');}return;}
+      if(t.hasAttribute('data-tpclose')){closePanels();return;}
+      if(t.hasAttribute('data-tptab')){var val=t.getAttribute('data-tptab');var grp=val.split(':')[0];tp.querySelectorAll('[data-tptab^="'+grp+':"]').forEach(function(b){b.classList.toggle('is-active',b.getAttribute('data-tptab')===val);});tp.querySelectorAll('[data-pane^="'+grp+':"]').forEach(function(pane){pane.classList.toggle('is-open',pane.getAttribute('data-pane')===val);});return;}
+      if(t.hasAttribute('data-tpselect')){tp.querySelectorAll('.tp-node').forEach(function(n){n.classList.remove('sel');});t.classList.add('sel');var h=document.getElementById('tpNodeHint');if(h){h.textContent=t.getAttribute('data-hint')||'';h.classList.add('show');clearTimeout(window.__tph);window.__tph=setTimeout(function(){h.classList.remove('show');},2400);}return;}
+      if(t.hasAttribute('data-tpan')){tp.querySelectorAll('[data-tpan]').forEach(function(r){r.classList.remove('sel');});t.classList.add('sel');tset('tpAnNote','Selected · '+t.getAttribute('data-tpan')+' — added to the project');return;}
+      if(t.hasAttribute('data-tppredict')){var di=tp.querySelector('#tpInDisc'),qi=tp.querySelector('#tpInQty');var d=di?parseFloat(di.value):0.1,q=qi?parseFloat(qi.value):5;if(isNaN(d))d=0;if(isNaN(q))q=0;var pred=Math.round((118+q*16-d*240)*100)/100;tset('tpPredOut','$'+pred.toFixed(2));return;}
+    });
+  }
+
+  /* ===== trimmed-section interactions ===== */
+  function txt(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+
+  var PER=[
+    {l:'P',n:'Priya',r:'Data scientist',need:'Wants total control and a model she can actually explain.',want:'Glass box'},
+    {l:'M',n:'Marcus',r:'Business analyst',need:'Fluent in SQL and domain — blocked the moment a task needs code.',want:'No dead ends'},
+    {l:'D',n:'Dana',r:'ML engineer',need:'Owns production reliability; inherits handoffs with no context.',want:'Context that travels'},
+    {l:'S',n:'Sofia',r:'Business sponsor',need:'Funds it, can\'t read a notebook — needs to see the answer.',want:'See the outcome'}
+  ];
+  var perTabs=document.querySelectorAll('.pswitch__tab');
+  perTabs.forEach(function(t,i){t.addEventListener('click',function(){
+    var p=PER[i];txt('psAv',p.l);txt('psName',p.n);txt('psRole',p.r);txt('psNeed',p.need);txt('psWant',p.want);
+    perTabs.forEach(function(x,j){x.classList.toggle('is-active',j===i);});
+  });});
+
+  var FND=[
+    {n:'F1',h:'Framed as pipelines, not questions',p:'The organizing unit was technical, so sponsors disengaged and scope drifted.',stat:'21 / 23 cited',link:'→ Principle 1'},
+    {n:'F2',h:'Handoffs are where projects die',p:'Every boundary between roles lost context, time, and intent.',stat:'7 handoffs / project',link:'→ Principle 4'},
+    {n:'F3',h:'Trust comes from transparency',p:'A more accurate model no one could inspect lost every time.',stat:'trust ≠ score',link:'→ Principle 3'},
+    {n:'F4',h:'Start from data you can see',p:'Guided exploration beat a blank canvas — the top request, especially from analysts.',stat:'#1 survey request',link:'→ Principle 5'},
+    {n:'F5',h:'Ops becomes an emergency',p:'Deploy and monitoring failed loudly because they were bolted on at the end.',stat:'bolted on late',link:'→ Principle 4'},
+    {n:'F6',h:'Skill altitude shifts by the minute',p:'The same person wants no-code, then full code, within an hour.',stat:'reframed the design',link:'→ Principle 2'}
+  ];
+  var fxRows=document.querySelectorAll('.fx__row');
+  fxRows.forEach(function(rrow,i){rrow.addEventListener('click',function(){
+    var f=FND[i];txt('fxBig',f.n);txt('fxH',f.h);txt('fxP',f.p);txt('fxStat',f.stat);txt('fxLink',f.link);
+    fxRows.forEach(function(x,j){x.classList.toggle('is-active',j===i);});
+  });});
+
+  var pmCap=document.getElementById('pmCap');
+  var pmDef=pmCap?pmCap.getAttribute('data-default'):'';
+  document.querySelectorAll('.pm-cat').forEach(function(g){
+    function on(){if(pmCap)pmCap.innerHTML=g.getAttribute('data-tip');}
+    function off(){if(pmCap)pmCap.innerHTML=pmDef;}
+    g.addEventListener('mouseenter',on);g.addEventListener('mouseleave',off);
+    g.addEventListener('focusin',on);g.addEventListener('focusout',off);
+  });
+
+})();
+
+
+</script>
+</body>
+</html>
