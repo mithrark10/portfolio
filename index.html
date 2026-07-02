@@ -454,6 +454,14 @@
   }
   @media (max-width:640px){
     body{font-size:16px}
+    /* Keep the whole hero — incl. the "Next stop Dubai" tag — within a phone screen */
+    header{align-items:flex-start}
+    .hero-inner{padding-top:74px;padding-bottom:28px}
+    .hero-grid{gap:18px}
+    .hero-portrait{width:min(42vw,172px);height:min(42vw,172px)}
+    .hero-tag{margin-bottom:14px}
+    .hero-sub{margin-top:16px;font-size:1.02rem}
+    .hero-meta{margin-top:18px;gap:9px 16px}
     .nav-links{position:fixed;inset:0 0 auto 0;top:0;flex-direction:column;gap:0;
       background:rgba(11,10,18,.97);backdrop-filter:blur(14px);padding:90px 28px 30px;
       transform:translateY(-110%);transition:transform .4s ease;border-bottom:1px solid var(--line);align-items:flex-start}
@@ -827,9 +835,10 @@ PROJECTS.forEach((p,i)=>{
   a.className='card'+(i===0?' feature':'');
   const internal=!!p.cs;
   a.href=internal?('#case/'+p.cs.replace(/\.html$/,'')):p.u;
-  if(!internal){a.target="_blank";a.rel="noopener";}
+  if(!internal && /^https?:\/\//i.test(p.u||'')){a.target="_blank";a.rel="noopener";}
+  if(p.thumb){ a.dataset.slug=p.thumb; a.addEventListener('click',()=>{try{sessionStorage.setItem('ps-work',p.thumb);}catch(e){}}); }
   const cta=p.cta||(internal?'Read case study':'View on Behance');
-  const arrow=internal?'→':'↗';
+  const arrow='→';
   const id=internal?p.cs.replace(/\.html$/,''):(p.thumb||'');
   const thumb=(typeof THUMBS!=='undefined'&&THUMBS[id])?`<div class="thumb"><span class="thumb-scrim"></span><img loading="lazy" alt="" src="${THUMBS[id]}"></div>`:'';
   a.innerHTML=`
@@ -874,6 +883,10 @@ const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
   if(!track) return;
   const cards=[...track.children];
   const N=PROJECTS.length;
+  /* When returning from a case study, land on ITS card in the rail (not the start). */
+  const targetSlug=(()=>{try{return sessionStorage.getItem('ps-work');}catch(e){return null;}})();
+  const targetIdx=targetSlug?cards.findIndex(c=>c.dataset&&c.dataset.slug===targetSlug):-1;
+  if(targetIdx>=0){try{sessionStorage.removeItem('ps-work');}catch(e){}}
   const setCount=p=>{ if(!countEl)return;
     const idx=Math.min(N,Math.max(1,Math.round(p*(N-1))+1));
     countEl.textContent=String(idx).padStart(2,'0')+' — '+String(N).padStart(2,'0'); };
@@ -886,6 +899,7 @@ const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
     const upd=()=>{ const max=rail.scrollWidth-rail.clientWidth||1; const p=rail.scrollLeft/max;
       if(progI) progI.style.transform=`scaleX(${Math.min(p,1)})`; setCount(p); };
     rail.addEventListener('scroll',upd,{passive:true}); upd();
+    if(targetIdx>=0){ addEventListener('load',()=>setTimeout(()=>{ const c=cards[targetIdx]; if(c){ rail.scrollLeft=Math.max(0,c.offsetLeft+c.offsetWidth/2-rail.clientWidth/2); upd(); } },80)); }
     return;
   }
 
@@ -936,6 +950,10 @@ const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
     });
     requestAnimationFrame(loop);
   })();
+  if(targetIdx>=0){
+    const go=()=>{ measure(); const p=N>1?targetIdx/(N-1):0; const de=document.documentElement, prev=de.style.scrollBehavior; de.style.scrollBehavior='auto'; window.scrollTo(0, Math.round(pinTop+p*(pinH-innerHeight))); de.style.scrollBehavior=prev; };
+    addEventListener('load',()=>{ setTimeout(go,90); setTimeout(go,240); });
+  }
 })();
 
 /* ============ THREE.JS HERO — interactive gradient data-field ============ */

@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Analance — Design System — Mithra Ramkumar</title>
 <script>if("scrollRestoration"in history)history.scrollRestoration="manual";addEventListener("load",function(){if(!location.hash)scrollTo(0,0);});</script>
+<style>html,body{margin:0;padding:0;background:#0b0a12}#cs-host{display:block;min-height:100vh}</style>
 </head>
 <body>
-
+<div id="cs-host"></div>
+<script type="text/html" id="cs-tpl">
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
@@ -308,7 +310,7 @@ footer .credit{font-family:var(--mono);font-size:12px;color:var(--faint);letter-
   <div class="topbar-inner">
     <div class="brand"><span class="dot"></span> Analance · Design System</div>
     <nav class="navlinks">
-      <a href="../index.html" style="font-weight:600">← Portfolio</a>
+      <a href="index.html" style="font-weight:600">← Portfolio</a>
       <a href="#understand">Understand</a>
       <a href="#audit">Audit</a>
       <a href="#foundations">Foundations</a>
@@ -728,10 +730,8 @@ footer .credit{font-family:var(--mono);font-size:12px;color:var(--faint);letter-
 </body>
 </html>
 
-
-<script>(function(){var _a=document.addEventListener.bind(document);document.addEventListener=function(t,cb,o){if(t==="DOMContentLoaded"&&document.readyState!=="loading"){setTimeout(function(){try{cb(new Event("DOMContentLoaded"))}catch(e){console.error(e)}},0);return;}return _a(t,cb,o);};})();</script>
-<script>
-
+</script>
+<script type="text/html" id="cs-code">
 
 // theme toggle — CSS is keyed on :host[data-theme], so the attribute must live on the
 // shadow host, not the real <html> (the template's <html data-theme="dark"> is stripped in shadow DOM).
@@ -769,7 +769,55 @@ addEventListener('touchend',endDrag);
 addEventListener('touchmove',e=>{if(dragging&&e.touches[0])setSplit(e.touches[0].clientX);},{passive:true});
 cmp.addEventListener('click',e=>{if(e.target!==div&&!div.contains(e.target))setSplit(e.clientX);});
 
-
+</script>
+<script>
+var CUR="analance-design-system";
+(function(){
+  var TOKEN='__CSCRIPTEND__';
+  function restore(x){return x.split(TOKEN).join('<'+'/script');}
+  var ORDER=[["velosidy-send","Send Communication"],["amanah","Amânah"],["ai-in-ux","AI in the UX Process"],["velosidy-client-portal","Client Portal"],["analance-mlops","Analance MLOps"],["analance-design-system","Analance — Design System"],["intro-vc","Intro.VC"],["autokar","AutoKar"]];
+  function hrefFor(sl){return sl==='amanah'?'../amanah/amanah-case-study/case-study.html':'../'+sl+'/index.html';}
+  var WORK='../index.html#work';
+  try{sessionStorage.setItem('ps-work',CUR);}catch(e){}
+  var host=document.getElementById('cs-host');
+  var root=host.attachShadow({mode:'open'});
+  root.innerHTML=restore(document.getElementById('cs-tpl').textContent);
+  // floating Portfolio button (only if the study has no back link of its own)
+  if(!root.querySelector('a[href*="index.html" i]')){
+    var b=document.createElement('a');b.href=WORK;b.textContent='← Portfolio';
+    b.setAttribute('style','position:fixed;top:14px;left:14px;z-index:2147483647;font:600 13px/1 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;color:#fff;background:rgba(15,14,18,.82);border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);text-decoration:none;box-shadow:0 4px 18px rgba(0,0,0,.25)');
+    document.body.appendChild(b);
+  }
+  root.addEventListener('click',function(e){
+    if(e.defaultPrevented)return;
+    var a=e.target&&e.target.closest?e.target.closest('a'):null; if(!a)return;
+    var href=a.getAttribute('href')||'';
+    if(/^index\.html/i.test(href)){e.preventDefault();location.href='../index.html'+href.replace(/^index\.html/i,'');return;}
+    var mc=href.match(/^#case\/([\w-]+)/); if(mc){e.preventDefault();location.href=hrefFor(mc[1]);return;}
+    if(href.charAt(0)==='#'&&href.length>1){var el=root.getElementById(decodeURIComponent(href.slice(1)));if(el){e.preventDefault();el.scrollIntoView({behavior:'smooth',block:'start'});}return;}
+    if(/^https?:\/\//i.test(href)&&!a.target){a.target='_blank';a.rel='noopener noreferrer';}
+  });
+  function scopedDoc(r){var real=document;return new Proxy(real,{get:function(t,p){
+    if(p==='getElementById')return function(id){return r.getElementById(id);};
+    if(p==='querySelector')return function(q){return r.querySelector(q);};
+    if(p==='querySelectorAll')return function(q){return r.querySelectorAll(q);};
+    if(p==='addEventListener')return function(ty,cb,o){if(ty==='DOMContentLoaded'||ty==='readystatechange'){setTimeout(function(){try{cb({type:ty})}catch(e){console.error(e)}},0);return;}return real.addEventListener(ty,cb,o);};
+    var v=t[p];return (typeof v==='function')?v.bind(t):v;
+  }});}
+  var code=restore(document.getElementById('cs-code').textContent);
+  if(code){try{(new Function('document','shadowRoot','window',code))(scopedDoc(root),root,window);}catch(e){console.error('case study script error:',e);}}
+  // bottom Prev / All work / Next band
+  var i=0; for(var k=0;k<ORDER.length;k++){if(ORDER[k][0]===CUR){i=k;break;}}
+  var prev=ORDER[(i-1+ORDER.length)%ORDER.length], next=ORDER[(i+1)%ORDER.length];
+  var ns=document.createElement('style');
+  ns.textContent='.ps-nav{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:stretch;padding:44px clamp(18px,5vw,56px);background:#0f0e12;color:#fff;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;border-top:1px solid rgba(255,255,255,.12)}.ps-nav a{text-decoration:none;color:inherit}.ps-nav .side{display:flex;flex-direction:column;gap:4px;padding:16px 20px;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.04);transition:background .2s,border-color .2s}.ps-nav .side:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.32)}.ps-nav .side.next{text-align:right;align-items:flex-end}.ps-nav .dir{font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.6}.ps-nav .ttl{font-size:17px;font-weight:650;line-height:1.2}.ps-nav .home{display:inline-flex;align-items:center;justify-content:center;align-self:center;padding:12px 22px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.06)}.ps-nav .home:hover{background:rgba(255,255,255,.14)}@media(max-width:680px){.ps-nav{grid-template-columns:1fr 1fr;gap:10px;padding:28px 18px}.ps-nav .home{grid-column:1/-1;order:-1}.ps-nav .ttl{font-size:14px}}';
+  root.appendChild(ns);
+  var nav=document.createElement('nav'); nav.className='ps-nav'; nav.setAttribute('aria-label','Case study navigation');
+  nav.innerHTML='<a class="side" href="'+hrefFor(prev[0])+'"><span class="dir">← Previous</span><span class="ttl">'+prev[1]+'</span></a>'
+    +'<a class="home" href="'+WORK+'">↑ All work</a>'
+    +'<a class="side next" href="'+hrefFor(next[0])+'"><span class="dir">Next →</span><span class="ttl">'+next[1]+'</span></a>';
+  root.appendChild(nav);
+})();
 </script>
 </body>
 </html>
